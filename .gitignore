@@ -4,3 +4,4 @@ tools/modbus-flash
 *.hex
 *.eep
 *.ignore
+.idea
