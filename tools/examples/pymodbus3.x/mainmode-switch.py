@@ -49,12 +49,8 @@
 
 """
 
-import sys
 import logging
 
-from pymodbus.constants import Endian
-from pymodbus.payload import BinaryPayloadDecoder
-from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.client import ModbusSerialClient as ModbusClient
 
 
@@ -64,7 +60,7 @@ log = logging.getLogger()
 log.setLevel(logging.INFO)
 
 # create connection (main mode is 38400)
-client = ModbusClient(method='rtu', port='/dev/ttyUSB0', baudrate=38400, timeout=1.5)
+client = ModbusClient(port='/dev/ttyUSB0', baudrate=38400, timeout=1.5)
 client.connect()
 
 idslave = 0x01
@@ -77,7 +73,7 @@ idslave = 0x01
 #     sys.exit(-1)
 
 print ("modbus cmd: 0x01 value: 0x0001 length: 0x01\n")
-result  = client.write_register(address=0x0000, value=0x0001, count=0x01, slave=idslave)
+result  = client.write_register(address=0x0000, value=0x0001, slave=idslave)
 print (result)
 
 print ("")

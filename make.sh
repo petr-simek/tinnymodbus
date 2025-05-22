@@ -7,7 +7,7 @@ rm -rf *.eep
 
 ##
 ## Enabled DEVICES
-##
+##-DSHT21 -DSI1145-DBMP280
 ##   DS18B20  (1w    | temperature)
 ##   SHT21    (i2c   | temperature + humidity + optional calibration)
 ##   SHT31    (i2c   | temperature + humidity + optional calibration)
@@ -18,7 +18,8 @@ rm -rf *.eep
 ##   CALIBRATION (software logic | enable support for temperature and humdidity calibration +/- 12,7 °C / %RH)
 ##   
 
-DEVS_ENABLE="-DDS18B20 -DSHT21 -DSI1145 -DBH1750 -DBMP280"
+DEVS_ENABLE="-DDS18B20 -DBH1750"
+#DEVS_ENABLE="-DDS18B20 -DSHT21 -DSI1145 -DBH1750 -DBMP280"
 #DEVS_ENABLE="-DSHT31 -DBH1750 -DCALIBRATION"
 
 # 1280 byte

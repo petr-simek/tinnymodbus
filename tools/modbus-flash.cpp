@@ -303,7 +303,7 @@ int main( int argc, char**argv )
     // burn data in 32 octet batches
     for ( long unsigned int i = 0; i < dataflash.size(); i++ )
     {
-
+       printf("Send %d from %d", i, dataflash.size());
       // place octet on wire message
       msg[offset + 6] = dataflash[i];
 
