@@ -7,7 +7,7 @@ rm -rf *.eep
 
 ##
 ## Enabled DEVICES
-##-DSHT21 -DSI1145-DBMP280
+##-DSHT21 -DSI1145-DBME280
 ##   DS18B20  (1w    | temperature)
 ##   SHT21    (i2c   | temperature + humidity + optional calibration)
 ##   SHT31    (i2c   | temperature + humidity + optional calibration)
@@ -18,7 +18,7 @@ rm -rf *.eep
 ##   CALIBRATION (software logic | enable support for temperature and humdidity calibration +/- 12,7 °C / %RH)
 ##   
 
-DEVS_ENABLE="-DDS18B20 -DBH1750"
+DEVS_ENABLE="-DDS18B20 -DBME280 -DBH1750"
 #DEVS_ENABLE="-DDS18B20 -DSHT21 -DSI1145 -DBH1750 -DBMP280"
 #DEVS_ENABLE="-DSHT31 -DBH1750 -DCALIBRATION"
 
@@ -37,9 +37,6 @@ echo
 ##
 
 avr-gcc -c $CFLAGS -flto -MF build/ds18b20.o.d  -Wa,-adhlns=build/ds18b20.lst    devs/ds18b20.c  -o build/ds18b20.o
-avr-gcc -c $CFLAGS -flto -MF build/sht21.o.d    -Wa,-adhlns=build/sht21.lst      devs/sht21.c    -o build/sht21.o
-avr-gcc -c $CFLAGS -flto -MF build/sht31.o.d    -Wa,-adhlns=build/sht31.lst      devs/sht31.c    -o build/sht31.o
-avr-gcc -c $CFLAGS -flto -MF build/si1145.o.d   -Wa,-adhlns=build/si1145.lst     devs/si1145.c   -o build/si1145.o
 avr-gcc -c $CFLAGS -flto -MF build/bh1750.o.d   -Wa,-adhlns=build/bh1750.lst     devs/bh1750.c   -o build/bh1750.o
 avr-gcc -c $CFLAGS -flto -MF build/bmp280.o.d   -Wa,-adhlns=build/bmp280.lst     devs/bmp280.c   -o build/bmp280.o
 avr-gcc -c $CFLAGS -flto -MF build/bme280.o.d   -Wa,-adhlns=build/bme280.lst     devs/bme280.c   -o build/bme280.o
@@ -49,14 +46,13 @@ avr-gcc -c $CFLAGS -flto -MF build/crc8.o.d     -Wa,-adhlns=build/crc8.lst      
 avr-gcc -c $CFLAGS -flto -MF build/crc16.o.d    -Wa,-adhlns=build/crc16.lst      libs/crc16.c    -o build/crc16.o
 avr-gcc -c $CFLAGS -flto -MF build/1wire.o.d    -Wa,-adhlns=build/1wire.lst      libs/1wire.c    -o build/1wire.o
 avr-gcc -c $CFLAGS -flto -MF build/softi2c.o.d  -Wa,-adhlns=build/softi2c.lst    libs/softi2c.c  -o build/softi2c.o
-avr-gcc -c $CFLAGS -flto -MF build/atsens.o.d   -Wa,-adhlns=build/atsens.lst     libs/atsens.c   -o build/atsens.o
 avr-gcc -c $CFLAGS -flto -MF build/usiuartx.o.d -Wa,-adhlns=build/usiuartx.c.lst libs/usiuartx.c -o build/usiuartx.o
 # main.c
 avr-gcc -c $CFLAGS -flto -MF build/main.o.d     -Wa,-adhlns=build/main.lst       main.c          -o build/main.o
 
 avr-gcc $CFLAGS -flto -o build/main.elf \
-                build/main.o build/usiuartx.o build/crc16.o build/crc8.o build/sht21.o build/sht31.o build/si1145.o \
-                build/bh1750.o build/bmp280.o build/bme280.o build/1wire.o build/softi2c.o build/atsens.o build/ds18b20.o \
+                build/main.o build/usiuartx.o build/crc16.o build/crc8.o \
+                build/bh1750.o build/bmp280.o build/bme280.o build/1wire.o build/softi2c.o build/ds18b20.o \
                 build/eeprom.o -Wl,--relax,--gc-sections,-Map=build/main.map
 
 

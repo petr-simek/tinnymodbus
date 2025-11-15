@@ -13,13 +13,13 @@ $ cd tinnymodbus
 
 ## Create Docker Container
 
-```
+```shell
 $ docker build -t avr-gcc8 tools/docker/avr-gcc-8/
 ```
 
 ## Compile code
 
-```
+```shell
 $ docker run -it --rm -v "$PWD":/opt/src avr-gcc8 bash
 [root@f86d24d031d3 src]# ./make.sh
 [root@f86d24d031d3 src]# ls
