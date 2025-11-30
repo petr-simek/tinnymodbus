@@ -10,10 +10,7 @@
 import sys
 import logging
 
-# from pymodbus.constants import Endian
 from pymodbus.client.mixin import ModbusClientMixin
-# from pymodbus.payload import BinaryPayloadDecoder
-# from pymodbus.payload import BinaryPayloadBuilder
 from pymodbus.client import ModbusSerialClient as ModbusClient
 
 
@@ -42,11 +39,17 @@ decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT
 print (decoder, " running mode\n")
 print ("")
 
-# print ("0x03 0x0001\n")
-# result  = client.read_holding_registers(address=0x0001, count=0x02, device_id=idslave)
-# x = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
-# print (''.join(chr((x>>8*(4-byte-1))&0xFF) for byte in range(4)) , " software version \n")
-#
+print ("0x03 0x0001\n")
+result  = client.read_holding_registers(address=0x0002, count=0x01, device_id=idslave)
+decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT16, registers=result.registers)
+print (decoder, " address\n")
+
+print ("0x03 0x0001\n")
+result  = client.read_holding_registers(address=0x0001, count=0x02, device_id=idslave)
+decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
+print (''.join(chr((decoder>>8*(4-byte-1))&0xFF) for byte in range(4)) , " software version \n")
+
+print ("")
 # print ("")
 
 # print ("0x03 0x0003\n")
@@ -116,26 +119,27 @@ print ("")
 #   print ("No 1-wire found.")
 
 
+#
+# try:
+#
+#   print ("")
+#
+#   print ("0x04 0x1220\n")
+#   result  = client.read_input_registers(address=0x1220, count=0x02, device_id=idslave)
+#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+#   print (" " ,decoder, " VI lux (bh1750)" )
+#
+# except:
+#
+#   print ("No BH1750 found.")
 
 try:
-
   print ("")
 
-  print ("0x04 0x1220\n")
-  result  = client.read_input_registers(address=0x1220, count=0x02, device_id=idslave)
-  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
-  print (" " ,decoder, " VI lux (bh1750)" )
-
-except:
-
-  print ("No BH1750 found.")
-
-try:
-  print ("")
 
   print ("0x04 0x1240\n")
   result  = client.read_input_registers(address=0x1240, count=0x02, device_id=idslave)
-  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
   #val = float(decoder.decode_32bit_int())
   #print (" %.2f °C (bme280)" % (val/100))
   print (" %.2f °C (bme280)" % decoder)
@@ -144,7 +148,7 @@ try:
 
   print ("0x04 0x1241\n")
   result  = client.read_input_registers(address=0x1241, count=0x02, device_id=idslave)
-  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
   #val = float(decoder.decode_32bit_int())
   #print (" %.2f hPa (bme280)" % (val/100))
   print (" %.2f hPa (bme280)" % decoder)
@@ -153,7 +157,7 @@ try:
 
   print ("0x04 0x1242\n")
   result  = client.read_input_registers(address=0x1242, count=0x02, device_id=idslave)
-  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
   #val = float(decoder.decode_32bit_int())
   #print (" %.2f %%RH (bme280)" % (val/100))
   print (" %.2f %%RH (bme280)" % decoder)
@@ -163,35 +167,31 @@ try:
 except:
 
   print ("No BME280 found.")
-# try:
-#   print ("")
-#
-#   print ("0x04 0x1250\n")
-#   result  = client.read_input_registers(address=0x1250, count=0x02, slave=idslave)
-#   decoder = BinaryPayloadDecoder.fromRegisters(result.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
-#   #print (decoder.decode_32bit_float(), " C (sht31)\n")
-#   print (" %.2f °C (sht31)" % decoder.decode_32bit_float())
-#
-#   print ("")
-#
-#   print ("0x04 0x1251\n")
-#   result  = client.read_input_registers(address=0x1251, count=0x02, slave=idslave)
-#   decoder = BinaryPayloadDecoder.fromRegisters(result.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
-#   #print (decoder.decode_32bit_float(), " % (sht31)\n")
-#   print (" %.2f %%RH (sht31)" % decoder.decode_32bit_float())
-#
-# except:
-#
-#   print ("No SHT31 found.")
+
 
 # try:
 #   print ("")
-#   print ("0x04 0x1250\n")
-#   result  = client.read_input_registers(address=0x1250, count=0x02, slave=idslave)
-#   val = float(client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers))
-#   print (" %.2f Light Value" % (val))
+#
+#   print ("0x04 0x1230\n")
+#   result  = client.read_input_registers(address=0x1230, count=0x02, device_id=idslave)
+#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
+#   #val = float(decoder.decode_32bit_int())
+#   #print (" %.2f °C (bme280)" % (val/100))
+#   print (" %.2f °C (bmp280)" % decoder)
 #
 #   print ("")
+#
+#   print ("0x04 0x1231\n")
+#   result  = client.read_input_registers(address=0x1231, count=0x02, device_id=idslave)
+#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
+#   #val = float(decoder.decode_32bit_int())
+#   #print (" %.2f hPa (bme280)" % (val/100))
+#   print (" %.2f hPa (bmp280)" % decoder)
+#
+#
+#   print ("")
+#
 # except:
-#   print ("No Light Sensor found.")
+#
+#   print ("No BMP280 found.")
 client.close()

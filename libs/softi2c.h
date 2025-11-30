@@ -49,9 +49,9 @@
 #define SOFTI2C_H
 
 
-#define SDA_PIN  PB4
+#define SDA_PIN  PB2
 #define SDA_PORT PORTB
-#define SCL_PIN  PB2
+#define SCL_PIN  PB4
 #define SCL_PORT PORTB
 
 

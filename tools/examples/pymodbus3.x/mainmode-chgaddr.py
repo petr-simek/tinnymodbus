@@ -52,9 +52,7 @@
 import sys
 import logging
 
-from pymodbus.constants import Endian
-from pymodbus.payload import BinaryPayloadDecoder
-from pymodbus.payload import BinaryPayloadBuilder
+from pymodbus.client.mixin import ModbusClientMixin
 from pymodbus.client import ModbusSerialClient as ModbusClient
 
 
@@ -64,7 +62,7 @@ log = logging.getLogger()
 log.setLevel(logging.INFO)
 
 # create connection (main mode is 38400)
-client = ModbusClient(method='rtu', port='/dev/ttyUSB0', baudrate=38400, timeout=1.5)
+client = ModbusClient(port='/dev/ttyUSB0', baudrate=38400, timeout=1.5)
 client.connect()
 
 try:
@@ -75,7 +73,7 @@ except:
   sys.exit(-1)
 
 print ("modbus cmd: 0x06 addr: 0x0001 value: 0x%04x length: 0x01\n" % newaddr)
-result  = client.write_register(address=0x0001, value=newaddr, count=0x01, slave=slvaddr)
+result  = client.write_register(address=0x0001, value=newaddr, device_id=slvaddr)
 print (result)
 
 print ("")

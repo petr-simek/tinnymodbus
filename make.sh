@@ -18,9 +18,41 @@ rm -rf *.eep
 ##   CALIBRATION (software logic | enable support for temperature and humdidity calibration +/- 12,7 °C / %RH)
 ##   
 
-DEVS_ENABLE="-DDS18B20 -DBME280 -DBH1750"
+DEVS_ENABLE="-DBH1750 -DBME280"
+#DEVS_ENABLE="-DDS18B20 -DBME280 -DBH1750 -DBMP280"
 #DEVS_ENABLE="-DDS18B20 -DSHT21 -DSI1145 -DBH1750 -DBMP280"
 #DEVS_ENABLE="-DSHT31 -DBH1750 -DCALIBRATION"
+
+# ---------- AUTO-INCREMENT SOFTWARE VERSION ----------
+VERSION_FILE="main.c"   # nebo main.c – tam kde máš SWVers
+VERSION_TAG='SWVers'
+
+# najdi aktuální verzi jako string 0.05
+CURRENT=$(grep "$VERSION_TAG" "$VERSION_FILE" | sed -n 's/.*"\(.*\)".*/\1/p')
+
+echo "Current version: $CURRENT"
+
+# rozděl na celé a desetinné místo
+MAJOR=${CURRENT%.*}
+MINOR=${CURRENT#*.}
+
+# převedeme minor na integer
+MINOR=$((10#$MINOR + 1))
+
+# pokud přeteče 99 → udělej 0 a zvedni major
+if [ "$MINOR" -ge 100 ]; then
+    MINOR=0
+    MAJOR=$((MAJOR + 1))
+fi
+
+# sestav novou verzi se dvěma čísly za tečkou
+NEW=$(printf "%d.%02d" "$MAJOR" "$MINOR")
+
+echo "New version: $NEW"
+
+# přepiš v souboru
+sed -i "s/\"$CURRENT\"/\"$NEW\"/" "$VERSION_FILE"
+# ------------------------------------------------------
 
 # 1280 byte
 # boot reserve

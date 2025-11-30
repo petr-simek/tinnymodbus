@@ -303,7 +303,7 @@ int main( int argc, char**argv )
     // burn data in 32 octet batches
     for ( long unsigned int i = 0; i < dataflash.size(); i++ )
     {
-       printf("Send %d from %d", i, dataflash.size());
+       printf("Send %ld from %ld\n", i, dataflash.size());
       // place octet on wire message
       msg[offset + 6] = dataflash[i];
 
@@ -333,12 +333,12 @@ int main( int argc, char**argv )
           printf( " %02x", msg[i] );
         }
 
-        printf(" CRC [0x");
+        printf("\n CRC [0x");
         for ( int i = 38; i < 40; i++ )
         {
           printf( "%02x", msg[i] );
         }
-        printf("]");
+        printf("]\n");
 
         // small buffer
         unsigned char buf[40];
@@ -356,7 +356,7 @@ int main( int argc, char**argv )
 
         unsigned char locrc = buf[0];
         unsigned char hicrc = buf[1];
-        printf( " CRC [0x%02x%02x]\n\n", locrc, hicrc );
+        printf( "\n CRC [0x%02x%02x]\n\n", locrc, hicrc );
         fflush( stdout );
 
         // reset message buffer

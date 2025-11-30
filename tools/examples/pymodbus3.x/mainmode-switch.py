@@ -50,7 +50,7 @@
 """
 
 import logging
-
+import sys
 from pymodbus.client import ModbusSerialClient as ModbusClient
 
 
@@ -63,17 +63,17 @@ log.setLevel(logging.INFO)
 client = ModbusClient(port='/dev/ttyUSB0', baudrate=38400, timeout=1.5)
 client.connect()
 
-idslave = 0x01
+idslave = 1
 
-# if len(sys.argv) == 2:
-#   try:
-#     idslave = int(sys.argv[1])
-#   except:
-#     print ("usage: %s [idslave]" % sys.argv[0])
-#     sys.exit(-1)
+if len(sys.argv) == 2:
+  try:
+    idslave = int(sys.argv[1])
+  except:
+    print ("usage: %s [idslave]" % sys.argv[0])
+    sys.exit(-1)
 
 print ("modbus cmd: 0x01 value: 0x0001 length: 0x01\n")
-result  = client.write_register(address=0x0000, value=0x0001, slave=idslave)
+result  = client.write_register(address=0x0000, value=0x0001, device_id=idslave)
 print (result)
 
 print ("")

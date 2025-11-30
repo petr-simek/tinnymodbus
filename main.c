@@ -59,23 +59,10 @@
 #include "crc16.h"
 #include "usiuartx.h"
 #include "softi2c.h"
-#include "atsens.h"
 
 #ifdef DS18B20
 #include "1wire.h"
 #include "ds18b20.h"
-#endif
-
-#ifdef SHT21
-#include "sht21.h"
-#endif
-
-#ifdef SHT31
-#include "sht31.h"
-#endif
-
-#ifdef SI1145
-#include "si1145.h"
 #endif
 
 #ifdef BH1750
@@ -91,20 +78,14 @@
 #endif
 
 
-// globals
-#ifdef ATSENS_H
-extern float sensVcc;
-extern float sensTmp;
-#endif
 extern uint8_t EEData[];
 
-uint8_t si1145_done = 0x00;
 uint8_t bh1750_done = 0x00;
 uint8_t bmp280_done = 0x00;
 uint8_t bme280_done = 0x00;
 
 // software version string
-static const char PROGMEM SWVers[4] = "0.11"; // 4 octet ASCII
+static const char PROGMEM SWVers[4] = "0.07"; // 4 octet ASCII
 
 /*
  *  embed and send modbus frame
@@ -143,19 +124,6 @@ int main(void)
 
     // fetch own slave address from EEPROM
     uint8_t IdSv = eeprom_read_byte(&EEData[0]);
-
-    #ifdef CALIBRATION
-    // fetch Temperature Offset from EEPROM
-    float CAL_TOffset = eeprom_read_byte(&EEData[1]) / 10.0f;
-    // fetch Humidity Offset from EEPROM
-    float CAL_HOffset = eeprom_read_byte(&EEData[2]) / 10.0f;
-    #endif
-
-    #ifdef ATSENS_H
-    // internal
-    // vcc+temp
-    getSens( 4 );
-    #endif
 
     #ifdef _DS18B20_H
     // 1w pin init
@@ -290,85 +258,6 @@ int main(void)
 
                                     send_modbus_array( &sendbuff[0], 7 );
                                 }
-                                #ifdef ATSENS_H
-                                // return internal VCC
-                                if ( daddr == 0x0003 )
-                                {
-                                    // requested amount
-                                    if ( modbus[5] != 0x02 ) break;
-
-                                    sendbuff[2] = 0x04; // mslen
-
-                                    // reads
-                                    getSens( 4 );
-
-                                    // store Vcc
-                                    sendbuff[3] = ((uint8_t*)(&sensVcc))[3];
-                                    sendbuff[4] = ((uint8_t*)(&sensVcc))[2];
-                                    sendbuff[5] = ((uint8_t*)(&sensVcc))[1];
-                                    sendbuff[6] = ((uint8_t*)(&sensVcc))[0];
-
-                                    send_modbus_array( &sendbuff[0], 9 );
-                                }
-
-                                // return internal TMP
-                                if ( daddr == 0x0004 )
-                                {
-                                    // requested amount
-                                    if ( modbus[5] != 0x02 ) break;
-
-                                    sendbuff[2] = 0x04; // mslen
-
-                                    // reads
-                                    getSens( 4 );
-
-                                    // store Temp
-                                    sendbuff[3] = ((uint8_t*)(&sensTmp))[3];
-                                    sendbuff[4] = ((uint8_t*)(&sensTmp))[2];
-                                    sendbuff[5] = ((uint8_t*)(&sensTmp))[1];
-                                    sendbuff[6] = ((uint8_t*)(&sensTmp))[0];
-
-                                    send_modbus_array( &sendbuff[0], 9 );
-                                }
-                                #endif
-                                #ifdef CALIBRATION
-                                // read Temperature Offset
-                                if ( daddr == 0x012 )
-                                {
-                                    // requested amount
-                                    if ( modbus[5] != 0x02 ) break;
-
-                                    sendbuff[2] = 0x04; // mslen
-
-                                    CAL_TOffset = eeprom_read_byte(&EEData[1]) / 10.0f;
-                                    float V = CAL_TOffset;
-
-                                    sendbuff[3] = ((uint8_t*)(&V))[3];
-                                    sendbuff[4] = ((uint8_t*)(&V))[2];
-                                    sendbuff[5] = ((uint8_t*)(&V))[1];
-                                    sendbuff[6] = ((uint8_t*)(&V))[0];
-
-                                    send_modbus_array( &sendbuff[0], 9 );
-                                }
-                                // read Humidity Offset
-                                if ( daddr == 0x022 )
-                                {
-                                    // requested amount
-                                    if ( modbus[5] != 0x02 ) break;
-
-                                    sendbuff[2] = 0x04; // mslen
-
-                                    CAL_HOffset = eeprom_read_byte(&EEData[2]) / 10.0f;
-                                    float V = CAL_HOffset;
-
-                                    sendbuff[3] = ((uint8_t*)(&V))[3];
-                                    sendbuff[4] = ((uint8_t*)(&V))[2];
-                                    sendbuff[5] = ((uint8_t*)(&V))[1];
-                                    sendbuff[6] = ((uint8_t*)(&V))[0];
-
-                                    send_modbus_array( &sendbuff[0], 9 );
-                                }
-                                #endif
                                 break; // fcode=0x03
 
                             // read input register
@@ -500,111 +389,6 @@ int main(void)
                                     }
                                 }
                                 #endif
-                                #ifdef _SHT21_H
-                                // return I2C DEV VALUES
-                                if ( ( daddr >= 0x1200 ) &&
-                                     ( daddr <= 0x1201 ) )
-                                {
-                                    // requested amount
-                                    if ( modbus[5] != 0x02 ) break;
-
-                                    sendbuff[2] = 0x04; // mslen
-
-                                    float V;
-
-                                    if ( daddr == 0x1200 )
-                                    {
-                                      V = (float)sht21ReadValue( SHT21_TEMP ) / 1000;
-                                      #ifdef CALIBRATION
-                                      V =  V + CAL_TOffset;
-                                      #endif
-                                    }
-
-                                    if ( daddr == 0x1201 )
-                                    {
-                                      V = (float)sht21ReadValue( SHT21_HUMI ) / 1000;
-                                      #ifdef CALIBRATION
-                                      V =  V + CAL_HOffset;
-                                      #endif
-                                    }
-
-                                    sendbuff[3] = ((uint8_t*)(&V))[3];
-                                    sendbuff[4] = ((uint8_t*)(&V))[2];
-                                    sendbuff[5] = ((uint8_t*)(&V))[1];
-                                    sendbuff[6] = ((uint8_t*)(&V))[0];
-
-                                    send_modbus_array( &sendbuff[0], 9 );
-                                }
-                                #endif
-                                #ifdef _SHT31_H
-                                // return I2C DEV VALUES
-                                if ( ( daddr >= 0x1250 ) &&
-                                     ( daddr <= 0x1251 ) )
-                                {
-                                    // requested amount
-                                    if ( modbus[5] != 0x02 ) break;
-
-                                    sendbuff[2] = 0x04; // mslen
-
-                                    float V;
-
-                                    if ( daddr == 0x1250 )
-                                    {
-                                      V = (float)sht31ReadValue( SHT31_TEMP ) / 100;
-                                      #ifdef CALIBRATION
-                                      V =  V + CAL_TOffset;
-                                      #endif
-                                    }
-
-                                    if ( daddr == 0x1251 )
-                                    {
-                                      V = (float)sht31ReadValue( SHT31_HUMI ) / 100;
-                                      #ifdef CALIBRATION
-                                      V =  V + CAL_HOffset;
-                                      #endif
-                                    }
-
-                                    sendbuff[3] = ((uint8_t*)(&V))[3];
-                                    sendbuff[4] = ((uint8_t*)(&V))[2];
-                                    sendbuff[5] = ((uint8_t*)(&V))[1];
-                                    sendbuff[6] = ((uint8_t*)(&V))[0];
-
-                                    send_modbus_array( &sendbuff[0], 9 );
-                                }
-                                #endif
-                                #ifdef _SI1145_H
-                                // return I2C DEV VALUES
-                                if ( ( daddr >= 0x1210 ) &&
-                                     ( daddr <= 0x1212 ) )
-                                {
-                                    // requested amount
-                                    if ( modbus[5] != 0x02 ) break;
-
-                                    sendbuff[2] = 0x04; // mslen
-
-                                    if ( si1145_done == 0x00 )
-                                    {
-                                      si1145_init();
-                                      si1145_done = 0x01;
-                                    }
-
-                                    float V;
-
-                                    if ( daddr == 0x1210 )
-                                      V = si1145_read_value(SI1145_READ_VI);
-                                    if ( daddr == 0x1211 )
-                                      V = si1145_read_value(SI1145_READ_IR);
-                                    if ( daddr == 0x1212 )
-                                      V = si1145_read_value(SI1145_READ_UV);
-
-                                    sendbuff[3] = ((uint8_t*)(&V))[3];
-                                    sendbuff[4] = ((uint8_t*)(&V))[2];
-                                    sendbuff[5] = ((uint8_t*)(&V))[1];
-                                    sendbuff[6] = ((uint8_t*)(&V))[0];
-
-                                    send_modbus_array( &sendbuff[0], 9 );
-                                }
-                                #endif
                                 #ifdef _BH1750_H
                                 // return I2C DEV VALUES
                                 if ( daddr == 0x1220 )
@@ -621,7 +405,6 @@ int main(void)
                                     }
 
                                     float V = bh1750_read_value();
-                                    V += 0.01;
 
                                     sendbuff[3] = ((uint8_t*)(&V))[3];
                                     sendbuff[4] = ((uint8_t*)(&V))[2];
@@ -686,9 +469,6 @@ int main(void)
                                     if ( daddr == 0x1240 )
                                     {
                                       V = bme280_read_value( BME280_TEMP );
-                                      #ifdef CALIBRATION
-                                      V =  V + CAL_TOffset;
-                                      #endif
                                     }
                                     if ( daddr == 0x1241 )
                                     {
@@ -697,9 +477,6 @@ int main(void)
                                     if ( daddr == 0x1242 )
                                     {
                                       V = bme280_read_value( BME280_HUM );
-                                      #ifdef CALIBRATION
-                                      V =  V + CAL_HOffset;
-                                      #endif
                                     }
 
                                     sendbuff[3] = ((uint8_t*)(&V))[3];
@@ -780,48 +557,6 @@ int main(void)
                                       send_modbus_exception( &sendbuff[0], 0x03 );
                                     }
                                 }
-                                #ifdef CALIBRATION
-                                // write Temperature Offset (8bit signed int)
-                                if ( daddr == 0x0011 )
-                                {
-                                    // values within 0x00 - 0xff
-                                    if ( ( modbus[4] == 0x00 ) &&
-                                         ( ( modbus[5] >= 0x00 ) &&
-                                           ( modbus[5] <= 0xff ) )
-                                       )
-                                    {
-                                      // write new Temperature Offset
-                                      eeprom_write_byte( &EEData[1], modbus[5]);
-
-                                      usiuartx_tx_array( &modbus[0], 8 );
-                                    }
-                                    else
-                                    {
-                                      // illegal data value
-                                      send_modbus_exception( &sendbuff[0], 0x03 );
-                                    }
-                                }
-                                // write Humidity Offset (8bit signed int)
-                                if ( daddr == 0x0021 )
-                                {
-                                    // values within 0x00 - 0xff
-                                    if ( ( modbus[4] == 0x00 ) &&
-                                         ( ( modbus[5] >= 0x00 ) &&
-                                           ( modbus[5] <= 0xff ) )
-                                       )
-                                    {
-                                      // write new Humidity Offset
-                                      eeprom_write_byte( &EEData[2], modbus[5]);
-
-                                      usiuartx_tx_array( &modbus[0], 8 );
-                                    }
-                                    else
-                                    {
-                                      // illegal data value
-                                      send_modbus_exception( &sendbuff[0], 0x03 );
-                                    }
-                                }
-                                #endif
                                 break; // fcode=0x06
 
                         } // end switch fcode

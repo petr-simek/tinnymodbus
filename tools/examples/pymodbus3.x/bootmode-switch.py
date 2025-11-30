@@ -74,7 +74,7 @@ if len(sys.argv) == 2:
     sys.exit(-1)
 
 print ("modbus cmd: 0x01 value: 0x0000 length: 0x01\n")
-result  = client.write_register(address=0x0000, value=0x0000, slave=idslave)
+result  = client.write_register(address=0x0000, value=0x0000, device_id=idslave)
 print (result)
 
 print ("")

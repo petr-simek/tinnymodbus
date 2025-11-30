@@ -61,7 +61,7 @@ void bh1750_init(void)
 {
     cli();
     i2c_start( BH1750_I2CADDR << 1 );
-    i2c_write( CONTINUOUS_HIGH_RES_MODE_2 );
+    i2c_write( CONTINUOUS_HIGH_RES_MODE );
     i2c_stop();
     sei();
 
@@ -76,14 +76,25 @@ float bh1750_read_value(void)
 {
     cli();
 
-    i2c_init();
-    i2c_start( (BH1750_I2CADDR<<1) | 0x1 );
-    uint16_t res = ((uint16_t)i2c_read(0)) << 7;
-    uint8_t  val = i2c_read(1);
-    res += (val >> 1);
-    i2c_stop();
+    uint8_t err = i2c_init();
+    if (err != 0) {
+        sei();
+        return -1.0 * err;  // nebo nějaký tvůj error kód
+    }
+     err = i2c_start( (BH1750_I2CADDR<<1) | 0x1 );
+    if (err) {
+        i2c_stop();
+        sei();
+        return -1 * (err + 0.5);                  // senzor nereaguje (NACK)
+    }
 
+    uint8_t msb = i2c_read(0);
+    uint8_t lsb = i2c_read(1);
+
+    i2c_stop();
     sei();
 
-    return (res + ((val & 0x01) ? 0.5f : 0.0f)) / 1.2f;
+    uint16_t raw = ((uint16_t)msb << 8) | lsb;  // klasické složení 16bit
+    float lux = raw / 1.2f;
+    return lux + 0.1;
 }

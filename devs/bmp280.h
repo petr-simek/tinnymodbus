@@ -55,7 +55,7 @@
 #define BMP280_TEMP 0x00
 #define BMP280_PRES 0x01
 
-#define BMP280_ADDRESS 0x77
+#define BMP280_ADDRESS 0x76
 
 // REGISTER ADDRESS DEFINITION
 #define BMP280_CHIP_ID_REG          (0xD0)  //Chip ID Register

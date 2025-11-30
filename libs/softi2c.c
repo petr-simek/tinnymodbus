@@ -227,35 +227,57 @@ static void i2c_wait_scl_high(void)
 uint8_t i2c_init(void)
 {
   __asm__ __volatile__
-    (" cbi      %[SDADDR],%[SDAPIN]     ;release SDA \n\t" 
-     " cbi      %[SCLDDR],%[SCLPIN]     ;release SCL \n\t" 
+    (
+     " cbi      %[SDADDR],%[SDAPIN]     ; SDA jako vstup \n\t"
+     " cbi      %[SCLDDR],%[SCLPIN]     ; SCL jako vstup \n\t"
 #if I2C_PULLUP
-     " sbi      %[SDAOUT],%[SDAPIN]     ;enable SDA pull-up\n\t"
+     " sbi      %[SDAOUT],%[SDAPIN]     ; zapni pull-up na SDA \n\t"
 #else
-     " cbi      %[SDAOUT],%[SDAPIN]     ;clear SDA output value \n\t"
+     " cbi      %[SDAOUT],%[SDAPIN]     ; SDA out bit = 0 \n\t"
 #endif
 #if I2C_PULLUP
-     " sbi      %[SCLOUT],%[SCLPIN]     ;enable SCL pull-up\n\t"
+     " sbi      %[SCLOUT],%[SCLPIN]     ; zapni pull-up na SCL \n\t"
 #else
-     " cbi      %[SCLOUT],%[SCLPIN]     ;clear SCL output value \n\t"
+     " cbi      %[SCLOUT],%[SCLPIN]     ; SCL out bit = 0 \n\t"
 #endif
-     " clr      r24                     ;set return value to false \n\t"
-     " clr      r25                     ;set return value to false \n\t"
-     " sbis     %[SDAIN],%[SDAPIN]      ;check for SDA high\n\t"
-     " ret                              ;if low return with false \n\t"
-     " sbis     %[SCLIN],%[SCLPIN]      ;check for SCL high \n\t"
-     " ret                              ;if low return with false \n\t"
-     " ldi      r24,1                   ;set return value to true \n\t"
-     " ret "
-     : :
+
+     // default: OK
+     " clr      r24                     ; r24 = 0 (OK) \n\t"
+     " clr      r25 \n\t"
+
+     // check SDA
+     " sbis     %[SDAIN],%[SDAPIN]      ; je SDA high?\n\t"
+     " rjmp     _Li2c_init_sda_low      ; pokud ne, chyba = 1 \n\t"
+
+     // check SCL
+     " sbis     %[SCLIN],%[SCLPIN]      ; je SCL high?\n\t"
+     " rjmp     _Li2c_init_scl_low      ; pokud ne, chyba = 2 \n\t"
+
+     // OK
+     " ret \n\t"
+
+     "_Li2c_init_sda_low:\n\t"
+     " ldi      r24,1                   ; SDA low \n\t"
+     " clr      r25 \n\t"
+     " ret \n\t"
+
+     "_Li2c_init_scl_low:\n\t"
+     " ldi      r24,2                   ; SCL low \n\t"
+     " clr      r25 \n\t"
+     " ret \n\t"
+     :
+     :
        [SCLDDR] "I" (SCL_DDR), [SCLPIN] "I" (SCL_PIN),
        [SCLIN]  "I" (SCL_IN),  [SCLOUT] "I" (SCL_OUT),
        [SDADDR] "I" (SDA_DDR), [SDAPIN] "I" (SDA_PIN),
-       [SDAIN]  "I" (SDA_IN),  [SDAOUT] "I" (SDA_OUT));
-  return 1;
+       [SDAIN]  "I" (SDA_IN),  [SDAOUT] "I" (SDA_OUT)
+    );
+  return 3; // sem se nikdy nedostaneš, jen kvůli kompilátoru
 }
 
-uint8_t  i2c_start(uint8_t addr)
+
+
+uint8_t i2c_start(uint8_t addr)
 {
   __asm__ __volatile__
     (
@@ -267,13 +289,27 @@ uint8_t  i2c_start(uint8_t addr)
 #if I2C_PULLUP
      " cbi      %[SDAOUT],%[SDAPIN]     ;disable pull-up \n\t"
 #endif
-     " sbi      %[SDADDR],%[SDAPIN]     ;force SDA low  \n\t" 
+     " sbi      %[SDADDR],%[SDAPIN]     ;force SDA low  \n\t"
      " rcall    ass_i2c_delay_half      ;wait T/2 \n\t"
-     " rcall    ass_i2c_write           ;now write address \n\t"
-     " ret"
-     : : [SDADDR] "I" (SDA_DDR), [SDAPIN] "I" (SDA_PIN),
-         [SDAOUT] "I" (SDA_OUT), [SCLOUT] "I" (SCL_OUT),
-         [SCLIN]  "I" (SCL_IN),  [SCLPIN] "I" (SCL_PIN));
+     " rcall    ass_i2c_write           ;now write address (addr je v r24) \n\t"
+     // Tvoje verze:
+     // C = 1 -> ACK (OK)
+     // C = 0 -> NACK / chyba
+
+     " brcs     _Li2c_start_ok          ;if C=1 (carry set) -> ACK OK\n\t"
+     " ldi      r24,1                   ;C=0 -> error code 1 (NACK) \n\t"
+     " clr      r25                     ;pro jistotu high byte \n\t"
+     " ret                              ;return 1 (error)\n\t"
+
+     "_Li2c_start_ok:\n\t"
+     " ldi      r24,0                   ;ACK -> OK, return 0\n\t"
+     " clr      r25                     ;high byte = 0\n\t"
+     " ret\n\t"
+     :
+     : [SDADDR] "I" (SDA_DDR), [SDAPIN] "I" (SDA_PIN),
+       [SDAOUT] "I" (SDA_OUT), [SCLOUT] "I" (SCL_OUT),
+       [SCLIN]  "I" (SCL_IN),  [SCLPIN] "I" (SCL_PIN)
+    );
   return 1; // we never return here!
 }
 
