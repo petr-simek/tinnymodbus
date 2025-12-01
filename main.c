@@ -65,6 +65,10 @@
 #include "ds18b20.h"
 #endif
 
+#ifdef SHT31
+#include "sht31.h"
+#endif
+
 #ifdef BH1750
 #include "bh1750.h"
 #endif
@@ -85,7 +89,7 @@ uint8_t bmp280_done = 0x00;
 uint8_t bme280_done = 0x00;
 
 // software version string
-static const char PROGMEM SWVers[4] = "0.07"; // 4 octet ASCII
+static const char PROGMEM SWVers[4] = "0.13"; // 4 octet ASCII
 
 /*
  *  embed and send modbus frame
@@ -387,6 +391,42 @@ int main(void)
                                       // illegal data address
                                       send_modbus_exception( &sendbuff[0], 0x02 );
                                     }
+                                }
+                                #endif
+                                 #ifdef _SHT31_H
+                                // return I2C DEV VALUES
+                                if ( ( daddr >= 0x1250 ) &&
+                                     ( daddr <= 0x1251 ) )
+                                {
+                                    // requested amount
+                                    if ( modbus[5] != 0x02 ) break;
+
+                                    sendbuff[2] = 0x04; // mslen
+
+                                    float V;
+
+                                    if ( daddr == 0x1250 )
+                                    {
+                                      V = (float)sht31ReadValue( SHT31_TEMP ) / 100;
+                                      #ifdef CALIBRATION
+                                      V =  V + CAL_TOffset;
+                                      #endif
+                                    }
+
+                                    if ( daddr == 0x1251 )
+                                    {
+                                      V = (float)sht31ReadValue( SHT31_HUMI ) / 100;
+                                      #ifdef CALIBRATION
+                                      V =  V + CAL_HOffset;
+                                      #endif
+                                    }
+
+                                    sendbuff[3] = ((uint8_t*)(&V))[3];
+                                    sendbuff[4] = ((uint8_t*)(&V))[2];
+                                    sendbuff[5] = ((uint8_t*)(&V))[1];
+                                    sendbuff[6] = ((uint8_t*)(&V))[0];
+
+                                    send_modbus_array( &sendbuff[0], 9 );
                                 }
                                 #endif
                                 #ifdef _BH1750_H

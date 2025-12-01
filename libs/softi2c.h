@@ -59,7 +59,7 @@
 #define I2C_SLOWMODE 0
 #define I2C_PULLUP 0
 #define I2C_NOINTERRUPT 1
-#define I2C_TIMEOUT 0
+#define I2C_TIMEOUT 100
 
 
 // Init function. Needs to be called once in the beginning.
