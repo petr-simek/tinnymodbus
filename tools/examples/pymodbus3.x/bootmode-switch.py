@@ -61,7 +61,7 @@ log = logging.getLogger()
 log.setLevel(logging.INFO)
 
 # create connection (boot mode is 9600)
-client = ModbusClient(port='/dev/ttyUSB0', baudrate=9600, timeout=1.5)
+client = ModbusClient(port='/dev/ttyACM0', baudrate=9600, timeout=1.5)
 client.connect()
 
 idslave = 0x01

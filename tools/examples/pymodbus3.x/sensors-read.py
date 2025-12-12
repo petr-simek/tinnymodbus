@@ -19,8 +19,8 @@ logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.INFO)
 
-client = ModbusClient(port='/dev/ttyUSB0', baudrate=38400, timeout=1.5)
-# client = ModbusClient( port='/dev/ttyUSB0', baudrate=19200, timeout=1.5)
+client = ModbusClient(port='/dev/ttyACM0', baudrate=38400, timeout=1.5)
+# client = ModbusClient( port='/dev/ttyACM0', baudrate=19200, timeout=1.5)
 #client = ModbusClient(method='rtu', port='/dev/ttyUSB0', baudrate=9600, timeout=1.5)
 client.connect()
 
@@ -134,43 +134,61 @@ print ("")
 #   print ("No BH1750 found.")
 
 try:
-  print ("")
 
-
-  print ("0x04 0x1240\n")
-  result  = client.read_input_registers(address=0x1240, count=0x02, device_id=idslave)
-  # Debug: print raw registers
-  print (f"  Raw registers: 0x{result.registers[0]:04X} 0x{result.registers[1]:04X}")
-  # Decode as big-endian (word order: big-endian, byte order: big-endian)
-  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
-  print (f"  Raw value: {decoder}")
-  print (" %.2f °C (bme280)" % (decoder/100.0))
+  print ("0x04 0x1200\n")
+  result  = client.read_input_registers(address=0x1250, count=0x02, device_id=idslave)
+  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+  print (" %.2f C (sht21)\n" % decoder)
 
   print ("")
 
-  print ("0x04 0x1241\n")
-  result  = client.read_input_registers(address=0x1241, count=0x02, device_id=idslave)
-  # Debug: print raw registers
-  print (f"  Raw registers: 0x{result.registers[0]:04X} 0x{result.registers[1]:04X}")
-  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
-  print (f"  Raw value: {decoder}")
-  print (" %.2f hPa (bme280)" % (decoder/100.0))
-
-  print ("")
-
-  print ("0x04 0x1242\n")
-  result  = client.read_input_registers(address=0x1242, count=0x02, device_id=idslave)
-  # Debug: print raw registers
-  print (f"  Raw registers: 0x{result.registers[0]:04X} 0x{result.registers[1]:04X}")
-  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
-  print (f"  Raw value: {decoder}")
-  print (" %.2f %%RH (bme280)" % (decoder/100.0))
-
-  print ("")
+  print ("0x04 0x1201\n")
+  result  = client.read_input_registers(address=0x1251, count=0x02, device_id=idslave)
+  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+  print (" %.2f (sht21)\n" % decoder)
 
 except:
 
-  print ("No BME280 found.")
+  print ("No SHT21 found.")
+
+# try:
+#   print ("")
+#
+#
+#   print ("0x04 0x1240\n")
+#   result  = client.read_input_registers(address=0x1240, count=0x02, device_id=idslave)
+#   # Debug: print raw registers
+#   print (f"  Raw registers: 0x{result.registers[0]:04X} 0x{result.registers[1]:04X}")
+#   # Decode as big-endian (word order: big-endian, byte order: big-endian)
+#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
+#   print (f"  Raw value: {decoder}")
+#   print (" %.2f °C (bme280)" % (decoder/100.0))
+#
+#   print ("")
+#
+#   print ("0x04 0x1241\n")
+#   result  = client.read_input_registers(address=0x1241, count=0x02, device_id=idslave)
+#   # Debug: print raw registers
+#   print (f"  Raw registers: 0x{result.registers[0]:04X} 0x{result.registers[1]:04X}")
+#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
+#   print (f"  Raw value: {decoder}")
+#   print (" %.2f hPa (bme280)" % (decoder/100.0))
+#
+#   print ("")
+#
+#   print ("0x04 0x1242\n")
+#   result  = client.read_input_registers(address=0x1242, count=0x02, device_id=idslave)
+#   # Debug: print raw registers
+#   print (f"  Raw registers: 0x{result.registers[0]:04X} 0x{result.registers[1]:04X}")
+#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
+#   print (f"  Raw value: {decoder}")
+#   print (" %.2f %%RH (bme280)" % (decoder/100.0))
+#
+#   print ("")
+#
+# except:
+#
+#   print ("No BME280 found.")
 
 
 # try:
