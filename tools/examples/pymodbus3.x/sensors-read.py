@@ -119,19 +119,19 @@ print ("")
 #   print ("No 1-wire found.")
 
 
-#
-# try:
-#
-#   print ("")
-#
-#   print ("0x04 0x1220\n")
-#   result  = client.read_input_registers(address=0x1220, count=0x02, device_id=idslave)
-#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
-#   print (" " ,decoder, " VI lux (bh1750)" )
-#
-# except:
-#
-#   print ("No BH1750 found.")
+
+try:
+
+  print ("")
+
+  print ("0x04 0x1220\n")
+  result  = client.read_input_registers(address=0x1220, count=0x02, device_id=idslave)
+  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+  print (" " ,decoder, " VI lux (bh1750)" )
+
+except:
+
+  print ("No BH1750 found.")
 
 try:
 
