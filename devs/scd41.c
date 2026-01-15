@@ -56,6 +56,7 @@ static uint16_t cached_co2 = 0;
 static uint16_t cached_temp = 0;
 static uint16_t cached_humi = 0;
 static uint8_t cache_valid = 0;
+static uint8_t cache_read_mask = 0;
 
 
 void scd41StartMeasurement(void)
@@ -109,6 +110,7 @@ int32_t scd41ReadValue(uint8_t TYPE)
         cached_humi = ((uint16_t) buffer[6] << 8) + buffer[7];
         
         cache_valid = 1;
+        cache_read_mask = 0;
     }
 
     switch ( TYPE )
@@ -116,19 +118,26 @@ int32_t scd41ReadValue(uint8_t TYPE)
       case SCD41_CO2:
         {
           V = cached_co2;
+          cache_read_mask |= 0x01;
         }
         break;
       case SCD41_TEMP:
         {
           V = (-45 + 175 * (cached_temp / 65536.0)) * 100;
+          cache_read_mask |= 0x02;
         }
         break;
       case SCD41_HUMI:
         {
           V = (100 * (cached_humi / 65536.0)) * 100;
-          cache_valid = 0;
+          cache_read_mask |= 0x04;
         }
         break;
+    }
+    
+    if ( cache_read_mask == 0x07 )
+    {
+        cache_valid = 0;
     }
 
   return V;
