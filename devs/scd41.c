@@ -63,8 +63,8 @@ void scd41StartMeasurement(void)
 {
     i2c_init();
     i2c_start(SCD41_ADDR<<1);
-    i2c_write(SCD41_START_PERIODIC_MEASUREMENT >> 8);
-    i2c_write(SCD41_START_PERIODIC_MEASUREMENT & 0xFF);
+    i2c_write(SCD41_START_LOW_POWER_PERIODIC_MEASUREMENT >> 8);
+    i2c_write(SCD41_START_LOW_POWER_PERIODIC_MEASUREMENT & 0xFF);
     i2c_stop();
 }
 
