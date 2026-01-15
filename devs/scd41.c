@@ -52,6 +52,11 @@
 #include "crc8.h"
 #include "softi2c.h"
 
+static uint16_t cached_co2 = 0;
+static uint16_t cached_temp = 0;
+static uint16_t cached_humi = 0;
+static uint8_t cache_valid = 0;
+
 
 void scd41StartMeasurement(void)
 {
@@ -79,46 +84,49 @@ int32_t scd41ReadValue(uint8_t TYPE)
     uint8_t buffer[9];
     uint32_t V;
 
-    i2c_init();
+    if ( cache_valid == 0 )
+    {
+        i2c_init();
 
-    i2c_start(SCD41_ADDR<<1);
-    i2c_write(SCD41_READ_MEASUREMENT >> 8);
-    i2c_write(SCD41_READ_MEASUREMENT & 0xFF);
-    
-    _delay_ms(1);
-    
-    i2c_rep_start((SCD41_ADDR<<1)|0x1);
+        i2c_start(SCD41_ADDR<<1);
+        i2c_write(SCD41_READ_MEASUREMENT >> 8);
+        i2c_write(SCD41_READ_MEASUREMENT & 0xFF);
+        
+        _delay_ms(1);
+        
+        i2c_rep_start((SCD41_ADDR<<1)|0x1);
 
-    int8_t idx = 0;
-    for(idx = 0; idx<8; idx++) {
-        buffer[idx] = i2c_read(0);
+        int8_t idx = 0;
+        for(idx = 0; idx<8; idx++) {
+            buffer[idx] = i2c_read(0);
+        }
+        buffer[++idx] = i2c_read(1);
+
+        i2c_stop();
+
+        cached_co2 = ((uint16_t) buffer[0] << 8) + buffer[1];
+        cached_temp = ((uint16_t) buffer[3] << 8) + buffer[4];
+        cached_humi = ((uint16_t) buffer[6] << 8) + buffer[7];
+        
+        cache_valid = 1;
     }
-    buffer[++idx] = i2c_read(1);
-
-    i2c_stop();
-
-    uint16_t rawCO2 = 0;
-    uint16_t rawTemperature = 0;
-    uint16_t rawHumidity = 0;
 
     switch ( TYPE )
     {
       case SCD41_CO2:
         {
-          rawCO2 = ((uint16_t) buffer[0] << 8) + buffer[1];
-          V = rawCO2;
+          V = cached_co2;
         }
         break;
       case SCD41_TEMP:
         {
-          rawTemperature = ((uint16_t) buffer[3] << 8) + buffer[4];
-          V = (-45 + 175 * (rawTemperature / 65536.0)) * 100;
+          V = (-45 + 175 * (cached_temp / 65536.0)) * 100;
         }
         break;
       case SCD41_HUMI:
         {
-          rawHumidity = ((uint16_t) buffer[6] << 8) + buffer[7];
-          V = (100 * (rawHumidity / 65536.0)) * 100;
+          V = (100 * (cached_humi / 65536.0)) * 100;
+          cache_valid = 0;
         }
         break;
     }
@@ -151,4 +159,60 @@ void scd41ReadSerial( uint8_t *sn )
     i2c_read(1);
 
     i2c_stop();
+}
+
+
+void scd41SetAmbientPressure( uint16_t pressure )
+{
+    uint8_t crc;
+    
+    i2c_init();
+    
+    i2c_start(SCD41_ADDR<<1);
+    
+    i2c_write(SCD41_SET_AMBIENT_PRESSURE >> 8);
+    i2c_write(SCD41_SET_AMBIENT_PRESSURE & 0xFF);
+    
+    i2c_write(pressure >> 8);
+    i2c_write(pressure & 0xFF);
+    
+    crc = crc8((uint8_t*)&pressure, 2);
+    i2c_write(crc);
+    
+    i2c_stop();
+}
+
+
+uint16_t scd41PerformForcedCalibration( uint16_t co2_reference )
+{
+    uint8_t buffer[3];
+    uint8_t crc;
+    uint16_t correction;
+    
+    i2c_init();
+    
+    i2c_start(SCD41_ADDR<<1);
+    
+    i2c_write(SCD41_PERFORM_FORCED_RECALIBRATION >> 8);
+    i2c_write(SCD41_PERFORM_FORCED_RECALIBRATION & 0xFF);
+    
+    i2c_write(co2_reference >> 8);
+    i2c_write(co2_reference & 0xFF);
+    
+    crc = crc8((uint8_t*)&co2_reference, 2);
+    i2c_write(crc);
+    
+    _delay_ms(400);
+    
+    i2c_rep_start((SCD41_ADDR<<1)|0x1);
+    
+    buffer[0] = i2c_read(0);
+    buffer[1] = i2c_read(0);
+    buffer[2] = i2c_read(1);
+    
+    i2c_stop();
+    
+    correction = ((uint16_t) buffer[0] << 8) + buffer[1];
+    
+    return correction;
 }

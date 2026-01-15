@@ -50,9 +50,11 @@
 #include "eeprom.h"
 
 // eeprom storage
-uint8_t  EEMEM EEData[3] =
+uint8_t  EEMEM EEData[5] =
     {
        0x01,  // modbus ID (default 0x01)
        0x00,  // temperature offset (SHT31)
-       0x00   // humidity-offset (SHT31)
+       0x00,  // humidity-offset (SHT31)
+       0x03,  // SCD41 pressure high byte (default 1013 hPa = 0x03F5)
+       0xF5   // SCD41 pressure low byte
     };

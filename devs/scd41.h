@@ -83,6 +83,8 @@ int32_t scd41ReadValue( uint8_t TYPE );
 void scd41ReadSerial( uint8_t *sn );
 void scd41StartMeasurement( void );
 void scd41StopMeasurement( void );
+void scd41SetAmbientPressure( uint16_t pressure );
+uint16_t scd41PerformForcedCalibration( uint16_t co2_reference );
 
 
 
