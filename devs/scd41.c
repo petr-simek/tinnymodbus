@@ -185,7 +185,7 @@ void scd41SetAmbientPressure( uint16_t pressure )
     i2c_write(pressure >> 8);
     i2c_write(pressure & 0xFF);
     
-    crc = crc8((uint8_t*)&pressure, 2);
+    crc = clcCRC8((uint8_t*)&pressure, 2);
     i2c_write(crc);
     
     i2c_stop();
@@ -208,7 +208,7 @@ uint16_t scd41PerformForcedCalibration( uint16_t co2_reference )
     i2c_write(co2_reference >> 8);
     i2c_write(co2_reference & 0xFF);
     
-    crc = crc8((uint8_t*)&co2_reference, 2);
+    crc = clcCRC8((uint8_t*)&co2_reference, 2);
     i2c_write(crc);
     
     _delay_ms(400);

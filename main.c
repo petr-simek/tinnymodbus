@@ -94,7 +94,7 @@ uint8_t bme280_done = 0x00;
 uint8_t scd41_done = 0x00;
 
 // software version string
-static const char PROGMEM SWVers[4] = "0.17"; // 4 octet ASCII
+static const char PROGMEM SWVers[4] = "0.25"; // 4 octet ASCII
 
 /*
  *  embed and send modbus frame
@@ -651,7 +651,7 @@ int main(void)
                                 if ( daddr == 0x1263 )
                                 {
                                     uint16_t pressure = (modbus[4] << 8) | modbus[5];
-                                    
+
                                     if ( ( pressure >= 700 ) && ( pressure <= 1400 ) )
                                     {
                                       scd41SetAmbientPressure( pressure );
@@ -670,16 +670,16 @@ int main(void)
                                 if ( daddr == 0x1264 )
                                 {
                                     uint16_t co2_ref = (modbus[4] << 8) | modbus[5];
-                                    
+
                                     if ( ( co2_ref >= 400 ) && ( co2_ref <= 2000 ) )
                                     {
                                       uint16_t correction = scd41PerformForcedCalibration( co2_ref );
-                                      
+
                                       sendbuff[2] = modbus[2];
                                       sendbuff[3] = modbus[3];
                                       sendbuff[4] = correction >> 8;
                                       sendbuff[5] = correction & 0xFF;
-                                      
+
                                       send_modbus_array( &sendbuff[0], 8 );
                                     }
                                     else

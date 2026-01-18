@@ -18,7 +18,7 @@ rm -rf *.eep
 ##   CALIBRATION (software logic | enable support for temperature and humdidity calibration +/- 12,7 °C / %RH)
 ##   
 
-DEVS_ENABLE="-DBH1750 -DSHT31"
+DEVS_ENABLE="-DBH1750 -DSHT31 -DSCD41"
 #DEVS_ENABLE="-DDS18B20 -DBME280 -DBH1750 -DBMP280"
 #DEVS_ENABLE="-DDS18B20 -DSHT21 -DSI1145 -DBH1750 -DBMP280"
 #DEVS_ENABLE="-DSHT31 -DBH1750 -DCALIBRATION"
@@ -69,6 +69,7 @@ echo
 ##
 
 avr-gcc -c $CFLAGS -flto -MF build/ds18b20.o.d  -Wa,-adhlns=build/ds18b20.lst    devs/ds18b20.c  -o build/ds18b20.o
+avr-gcc -c $CFLAGS -flto -MF build/scd41.o.d    -Wa,-adhlns=build/scd41.lst      devs/scd41.c    -o build/scd41.o
 avr-gcc -c $CFLAGS -flto -MF build/sht31.o.d    -Wa,-adhlns=build/sht31.lst      devs/sht31.c    -o build/sht31.o
 avr-gcc -c $CFLAGS -flto -MF build/bh1750.o.d   -Wa,-adhlns=build/bh1750.lst     devs/bh1750.c   -o build/bh1750.o
 avr-gcc -c $CFLAGS -flto -MF build/bmp280.o.d   -Wa,-adhlns=build/bmp280.lst     devs/bmp280.c   -o build/bmp280.o
@@ -84,7 +85,7 @@ avr-gcc -c $CFLAGS -flto -MF build/usiuartx.o.d -Wa,-adhlns=build/usiuartx.c.lst
 avr-gcc -c $CFLAGS -flto -MF build/main.o.d     -Wa,-adhlns=build/main.lst       main.c          -o build/main.o
 
 avr-gcc $CFLAGS -flto -o build/main.elf \
-                build/main.o build/usiuartx.o build/crc16.o build/crc8.o  build/sht31.o  \
+                build/main.o build/usiuartx.o build/crc16.o build/crc8.o  build/sht31.o build/scd41.o  \
                 build/bh1750.o build/bmp280.o build/bme280.o build/1wire.o build/softi2c.o build/ds18b20.o \
                 build/eeprom.o -Wl,--relax,--gc-sections,-Map=build/main.map
 

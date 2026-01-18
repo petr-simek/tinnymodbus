@@ -158,18 +158,18 @@ print (decoder.decode_16bit_int(), " slave address\n")
 #   print ("No SI1145 found.")
 
 
-try:
-
-  print ("")
-
-  print ("0x04 0x1220\n")
-  result  = client.read_input_registers(address=0x1220, count=0x02, slave=idslave)
-  decoder = BinaryPayloadDecoder.fromRegisters(result.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
-  print (" %f VI lux (bh1750)" % decoder.decode_32bit_float())
-
-except:
-
-  print ("No BH1750 found.")
+# try:
+#
+#   print ("")
+#
+#   print ("0x04 0x1220\n")
+#   result  = client.read_input_registers(address=0x1220, count=0x02, slave=idslave)
+#   decoder = BinaryPayloadDecoder.fromRegisters(result.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
+#   print (" %f VI lux (bh1750)" % decoder.decode_32bit_float())
+#
+# except:
+#
+#   print ("No BH1750 found.")
 
 # try:
 #   print ("")
