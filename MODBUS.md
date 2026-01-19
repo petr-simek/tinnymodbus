@@ -13,8 +13,6 @@
   | 0x0000 (1 regs) | 2 byte (uint16_t) | Running mode (0/mainapp 1/bootload)                        |
   | 0x0001 (2 regs) | 4 byte (char[4])  | Software version string (ASCII)                            |
   | 0x0002 (1 regs) | 2 byte (uint16_t) | Slave address (0x01-0xfe valid range)                      |
-  | 0x0003 (2 regs) | 4 byte (float)    | Internal Vcc voltage (Volts)                               |
-  | 0x0004 (2 regs) | 4 byte (float)    | Internal temperature (Celsius)                             |
 
   **Input Registers (0x04)**
 
@@ -29,25 +27,31 @@
   |                 |                   |   **0x02 Illegal data address (device XX does not exist)** |
   |                 |                   |   **0x08 Parity Error         (device XX CRC failed)**     |
   |                 |                   |   **0x11 Failed to Respond    (device XX BUS failed)**     |
-  | 0x1200 (2 regs) | 4 byte (float)    | I2C: Read temperture from SHT21 device (Celsius)           |
-  | 0x1201 (2 regs) | 4 byte (float)    | I2C: Read R humidity from SHT21 device (Percent)           |
-  | 0x1210 (2 regs) | 4 byte (float)    | I2C: Read visible light lux from SI1145 device (Lux)       |
-  | 0x1211 (2 regs) | 4 byte (float)    | I2C: Read ifrared light lux from SI1145 device (Lux)       |
-  | 0x1211 (2 regs) | 4 byte (float)    | I2C: Read ultraviolet index from SI1145 device (Index)     |
-  | 0x1230 (2 regs) | 4 byte (float)    | I2C: Read temperature from BMP280 device (Celsius)         |
-  | 0x1231 (2 regs) | 4 byte (float)    | I2C: Read air pressure from BMP280 device (hPa)            |
-  | 0x1240 (2 regs) | 4 byte (float)    | I2C: Read temperature from BME280 device (Celsius)         |
-  | 0x1241 (2 regs) | 4 byte (float)    | I2C: Read air pressure from BME280 device (hPa)            |
-  | 0x1242 (2 regs) | 4 byte (float)    | I2C: Read R humidity from BME280 device (RH)               |
+  | 0x1220 (2 regs) | 4 byte (float)    | I2C: Read illuminance from BH1750 device (Lux)             |
+  | 0x1230 (2 regs) | 4 byte (int32_t)  | I2C: Read temperature from BMP280 device (Celsius)         |
+  | 0x1231 (2 regs) | 4 byte (int32_t)  | I2C: Read air pressure from BMP280 device (hPa)            |
+  | 0x1240 (2 regs) | 4 byte (int32_t)  | I2C: Read temperature from BME280 device (Celsius)         |
+  | 0x1241 (2 regs) | 4 byte (int32_t)  | I2C: Read air pressure from BME280 device (hPa)            |
+  | 0x1242 (2 regs) | 4 byte (int32_t)  | I2C: Read R humidity from BME280 device (%)                |
+  | 0x1250 (2 regs) | 4 byte (float)    | I2C: Read temperature from SHT31 device (Celsius)          |
+  | 0x1251 (2 regs) | 4 byte (float)    | I2C: Read R humidity from SHT31 device (%)                 |
+  | 0x1260 (2 regs) | 4 byte (int32_t)  | I2C: Read CO2 from SCD41 device (ppm)                      |
+  | 0x1261 (2 regs) | 4 byte (int32_t)  | I2C: Read temperature from SCD41 device (Celsius)          |
+  | 0x1262 (2 regs) | 4 byte (int32_t)  | I2C: Read R humidity from SCD41 device (%)                 |
 
   **Write Registers (0x06)**
 
   | Addr (regs)     | Length (type)     |                          Action                            |
   | --------------- | ----------------- | ---------------------------------------------------------- |
   | 0x0000 (1 regs) | 2 byte (uint16_t) | Change running MODE (0/mainapp 1/bootload)                 |
-  |                 |                   |   **0x03 Invalid data value (must be 0x01)**               |
+  |                 |                   |   **0x03 Invalid data value (must be 0x0001)**             |
   | 0x0001 (1 regs) | 2 byte (uint16_t) | Change slave address                                       |
   |                 |                   |   **0x03 Invalid data value (must be in 0x01-0xfe range)** |
+  | 0x1263 (1 regs) | 2 byte (uint16_t) | SCD41: Set ambient pressure (700-1400 hPa)                 |
+  |                 |                   |   **0x03 Invalid data value (must be 700-1400)**           |
+  | 0x1264 (1 regs) | 2 byte (uint16_t) | SCD41: Forced calibration CO2 reference (400-2000 ppm)     |
+  |                 |                   |   **0x03 Invalid data value (must be 400-2000)**           |
+  |                 |                   |   **Returns correction value in response**                 |
 
 
 

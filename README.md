@@ -2,6 +2,8 @@
 
 TinnyModBus is a very small 11x26mm reconfigurable atmel attiny85 mcu based micro-module that speaks modbus over rs485 two wires. It collects measurements locally from large variety of implemented sensors. It can be reprogrammed right on its own rs485 via it's own bootloader.
 
+> **Note**: This project is based on the original [tinnymodbus](https://github.com/cbalint13/tinnymodbus) by cbalint13, with additional sensors support and ESPHome integration.
+
 ![Logo](https://github.com/cbalint13/tinnymodbus/raw/master/docs/tinnymodbus-pcb.png)
 
 > Main specs
@@ -28,6 +30,18 @@ Connects sensors:
   - or can do **gpio** or **adc**
   - multiple **i2c & 1w** sensors can be **simultaneously** wired
 
+> Supported Sensors
+
+  **1-Wire Sensors:**
+  - DS18B20 - Temperature sensor (up to 32 devices)
+
+  **I2C Sensors:**
+  - BH1750 - Light intensity sensor (Lux)
+  - SHT31 - Temperature and humidity sensor
+  - BMP280 - Temperature and pressure sensor
+  - BME280 - Temperature, pressure and humidity sensor
+  - SCD41 - CO2, temperature and humidity sensor
+
 
   ```
   >~~~~~~~~~~~~>---  GND   --->|-|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|SCK|>-----  SCK  ----> i2c/SCK sensor(s)
@@ -36,12 +50,25 @@ Connects sensors:
   >~~~~~~~~~~~~>---   B    --->|B|__________________|GND|>-----  GND  ----> ground
   ```
 
-ModBus detailed register description are in [MODBUS.md](https://github.com/cbalint13/tinnymodbus/blob/master/MODBUS.md).
+ModBus detailed register description are in [MODBUS.md](MODBUS.md).
 
 Schematic, Printed Circuit Board, 3D layout are available on [CircuitMaker](https://workspace.circuitmaker.com/Projects/Details/Cristian-Balint/TinnyModbus), but can be also checked in **docs** folder.
 
-
 Docs & usage scenario examples are in ```tools/examples/``` folder.
+
+> ESPHome Integration
+
+**Note:** ESPHome integration is currently work in progress.
+
+ESPHome configuration for controlling and flashing TinnyModBus devices is available in ```tools/esphome/``` folder.
+
+Features:
+- Normal Modbus RTU communication at 38400 baud for sensor data reading
+- Remote firmware flashing over RS485 with automatic mode switching
+- Button controls in Home Assistant for easy operation
+- Supports all implemented sensors (BH1750, SHT31, BMP280, BME280, SCD41, DS18B20)
+
+See [tools/esphome/README.md](tools/esphome/README.md) for complete installation and usage instructions.
 
 > BUILD
 

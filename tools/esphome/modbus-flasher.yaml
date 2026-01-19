@@ -1,0 +1,219 @@
+esphome:
+  name: modbus-flasher
+  platform: ESP32
+  board: esp32dev
+  includes:
+    - modbus_flasher.h
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  
+  ap:
+    ssid: "Modbus-Flasher Fallback"
+    password: !secret ap_password
+
+logger:
+  level: DEBUG
+  baud_rate: 0
+
+api:
+  encryption:
+    key: !secret api_key
+
+ota:
+  password: !secret ota_password
+
+uart:
+  id: modbus_uart
+  tx_pin: GPIO17
+  rx_pin: GPIO16
+  baud_rate: 38400
+  stop_bits: 1
+  data_bits: 8
+  parity: NONE
+
+modbus:
+  id: modbus_bus
+  uart_id: modbus_uart
+  send_wait_time: 100ms
+
+modbus_controller:
+  - id: tinny
+    address: 0x01
+    modbus_id: modbus_bus
+    update_interval: 10s
+    setup_priority: -10
+
+globals:
+  - id: target_slave_id
+    type: int
+    restore_value: no
+    initial_value: '1'
+  - id: flash_in_progress
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: normal_communication_enabled
+    type: bool
+    restore_value: yes
+    initial_value: 'true'
+
+switch:
+  - platform: template
+    name: "Enable Normal Communication"
+    id: enable_communication
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    on_turn_on:
+      - lambda: |-
+          id(normal_communication_enabled) = true;
+          id(tinny).set_online();
+      - logger.log: "Normal Modbus communication enabled"
+    on_turn_off:
+      - lambda: |-
+          id(normal_communication_enabled) = false;
+          id(tinny).set_offline();
+      - logger.log: "Normal Modbus communication disabled"
+
+number:
+  - platform: template
+    name: "Modbus Slave ID"
+    id: slave_id_input
+    optimistic: true
+    min_value: 1
+    max_value: 255
+    step: 1
+    initial_value: 1
+    on_value:
+      then:
+        - lambda: |-
+            id(target_slave_id) = (int)x;
+            id(tinny).set_address((int)x);
+
+button:
+  - platform: template
+    name: "Switch to Boot Mode"
+    id: switch_to_boot
+    on_press:
+      - logger.log: "Switching to BOOT mode (38400 baud)"
+      - switch.turn_off: enable_communication
+      - delay: 200ms
+      - lambda: |-
+          id(modbus_uart).set_baud_rate(38400);
+          delay(100);
+      - modbus_controller.write_register:
+          id: tinny
+          address: 0x0000
+          value: 0x0001
+      - delay: 500ms
+      - lambda: |-
+          id(modbus_uart).set_baud_rate(9600);
+          delay(100);
+      - logger.log: "Switched to BOOT mode (now at 9600 baud)"
+
+  - platform: template
+    name: "Switch to Main Mode"
+    id: switch_to_main
+    on_press:
+      - logger.log: "Switching to MAIN mode"
+      - modbus_controller.write_register:
+          id: tinny
+          address: 0x0000
+          value: 0x0000
+      - delay: 500ms
+      - lambda: |-
+          id(modbus_uart).set_baud_rate(38400);
+          delay(100);
+      - logger.log: "Switched to MAIN mode (now at 38400 baud)"
+      - delay: 200ms
+      - switch.turn_on: enable_communication
+
+  - platform: template
+    name: "Flash Firmware"
+    id: flash_firmware_btn
+    on_press:
+      - logger.log: "Starting firmware flash sequence"
+      - lambda: |-
+          if (id(flash_in_progress)) {
+            ESP_LOGW("flash", "Flash already in progress!");
+            return;
+          }
+          id(flash_in_progress) = true;
+      - button.press: switch_to_boot
+      - delay: 1s
+      - lambda: |-
+          auto *flasher = new ModbusFlasher(id(modbus_uart), id(target_slave_id));
+          if (flasher->flash_firmware()) {
+            ESP_LOGI("flash", "Firmware flashed successfully!");
+          } else {
+            ESP_LOGE("flash", "Firmware flash failed!");
+          }
+          delete flasher;
+          id(flash_in_progress) = false;
+      - delay: 1s
+      - button.press: switch_to_main
+
+sensor:
+  - platform: modbus_controller
+    modbus_controller_id: tinny
+    id: bh1750_raw
+    name: "Brightness"
+    address: 0x1220
+    value_type: FP32
+    register_type: read
+    unit_of_measurement: "lx"
+    accuracy_decimals: 2
+
+  - platform: modbus_controller
+    modbus_controller_id: tinny
+    name: "Device ID"
+    address: 0x0002
+    register_type: holding
+    value_type: U_WORD
+    lambda: |-
+      return ((int)x) & 0x00FF;
+
+  - platform: modbus_controller
+    modbus_controller_id: tinny
+    name: "SHT21 Temperature"
+    id: sht21_temp
+    register_type: read
+    address: 0x1250
+    value_type: FP32
+    unit_of_measurement: "°C"
+    accuracy_decimals: 2
+
+  - platform: modbus_controller
+    modbus_controller_id: tinny
+    name: "SHT21 Humidity"
+    id: sht21_val_1251
+    register_type: read
+    unit_of_measurement: "%"
+    address: 0x1251
+    value_type: FP32
+    accuracy_decimals: 2
+
+text_sensor:
+  - platform: modbus_controller
+    modbus_controller_id: tinny
+    name: "Software Version"
+    address: 0x01
+    register_type: holding
+    register_count: 2
+    response_size: 4
+    raw_encode: ANSI
+    force_new_range: true
+
+  - platform: template
+    name: "Flash Status"
+    id: flash_status
+    update_interval: 1s
+    lambda: |-
+      if (id(flash_in_progress)) {
+        return {"Flashing in progress..."};
+      } else if (!id(normal_communication_enabled)) {
+        return {"Communication disabled"};
+      } else {
+        return {"Ready"};
+      }
