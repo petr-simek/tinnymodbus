@@ -16,7 +16,6 @@ This implementation converts the functionality of Python/C++ tools for flashing 
 Convert your `main.hex` file to C++ array:
 
 ```bash
-cd tools/esphome
 python3 hex_to_cpp.py ../../main.hex
 ```
 

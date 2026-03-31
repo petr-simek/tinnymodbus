@@ -119,59 +119,59 @@ print ("")
 #   print ("No 1-wire found.")
 
 
-#
-# try:
-#
-#   print ("")
-#
-#   print ("0x04 0x1220\n")
-#   result  = client.read_input_registers(address=0x1220, count=0x02, device_id=idslave)
-#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
-#   print (" " ,decoder, " VI lux (bh1750)" )
-#
-# except:
-#
-#   print ("No BH1750 found.")
-#
-# try:
-#
-#   print ("0x04 0x1200\n")
-#   result  = client.read_input_registers(address=0x1250, count=0x02, device_id=idslave)
-#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
-#   print (" %.2f C (sht21)\n" % decoder)
-#
-#   print ("")
-#
-#   print ("0x04 0x1201\n")
-#   result  = client.read_input_registers(address=0x1251, count=0x02, device_id=idslave)
-#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
-#   print (" %.2f (sht21)\n" % decoder)
-#
-# except:
-#
-#   print ("No SHT21 found.")
 
 try:
 
-  print ("0x04 0x1260\n")
-  result  = client.read_input_registers(address=0x1260, count=0x02, device_id=idslave)
-  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
-  print (" %.2f co2 (sdc41)\n" % decoder)
-  #
-  # print ("")
-  #
-  print ("0x04 0x1261\n")
-  result  = client.read_input_registers(address=0x1261, count=0x02, device_id=idslave)
-  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
-  print (" %.2f c (sdc41)\n" % (decoder/100))
+  print ("")
 
+  print ("0x04 0x1220\n")
+  result  = client.read_input_registers(address=0x1220, count=0x02, device_id=idslave)
+  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+  print (" " ,decoder, " VI lux (bh1750)" )
 
-  print ("0x04 0x1262\n")
-  result  = client.read_input_registers(address=0x1262, count=0x02, device_id=idslave)
-  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
-  print (" %.2f hum (sdc41)\n" % (decoder/100))
 except:
-  print ("No sdc41 found.")
+
+  print ("No BH1750 found.")
+
+try:
+
+  print ("0x04 0x1200\n")
+  result  = client.read_input_registers(address=0x1250, count=0x02, device_id=idslave)
+  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+  print (" %.2f C (sht21)\n" % decoder)
+
+  print ("")
+
+  print ("0x04 0x1201\n")
+  result  = client.read_input_registers(address=0x1251, count=0x02, device_id=idslave)
+  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+  print (" %.2f (sht21)\n" % decoder)
+
+except:
+
+  print ("No SHT21 found.")
+
+# try:
+#
+#   print ("0x04 0x1260\n")
+#   result  = client.read_input_registers(address=0x1260, count=0x02, device_id=idslave)
+#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
+#   print (" %.2f co2 (sdc41)\n" % decoder)
+#   #
+#   # print ("")
+#   #
+#   print ("0x04 0x1261\n")
+#   result  = client.read_input_registers(address=0x1261, count=0x02, device_id=idslave)
+#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
+#   print (" %.2f c (sdc41)\n" % (decoder/100))
+#
+#
+#   print ("0x04 0x1262\n")
+#   result  = client.read_input_registers(address=0x1262, count=0x02, device_id=idslave)
+#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
+#   print (" %.2f hum (sdc41)\n" % (decoder/100))
+# except:
+#   print ("No sdc41 found.")
 # try:
 #   print ("")
 #

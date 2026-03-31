@@ -11,8 +11,8 @@ FUSE_FLAGS='-U lfuse:w:0xE2:m -U hfuse:w:0xDD:m -U efuse:w:0xFE:m'
 #arduino uploader
 #avrdude -c usbasp -P usb -p attiny85 $FUSE_FLAGS -U flash:w:boot.hex -e -D -v -U eeprom:w:boot.eep -B3
 #with help of arduino
-avrdude -V -pattiny85 -cstk500v1 -P/dev/ttyACM0 -b19200 $FUSE_FLAGS -U flash:w:boot.hex -e -v -U eeprom:w:boot.eep
-avrdude -V -pattiny85 -cstk500v1 -P/dev/ttyACM0 -b19200 -D -U flash:w:main.hex -v
+avrdude -V -pattiny85 -carduino -P/dev/ttyACM0 -b19200 $FUSE_FLAGS -U flash:w:boot.hex -e -v -U eeprom:w:boot.eep
+avrdude -V -pattiny85 -carduino -P/dev/ttyACM0 -b19200 -D -U flash:w:main.hex -v
 
 
 
