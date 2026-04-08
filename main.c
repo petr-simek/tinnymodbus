@@ -94,7 +94,7 @@ uint8_t bme280_done = 0x00;
 uint8_t scd41_done = 0x00;
 
 // software version string
-static const char PROGMEM SWVers[4] = "0.44"; // 4 octet ASCII
+static const char PROGMEM SWVers[4] = "0.49"; // 4 octet ASCII
 
 /*
  *  embed and send modbus frame
@@ -412,6 +412,7 @@ int main(void)
                                     uint8_t found = 0;
 
                                     i2c_init();
+                                    _delay_ms(10);
 
                                     for (uint8_t a = 1; a < 128; a++) {
                                         if (i2c_start(a << 1) != 0) {
@@ -420,6 +421,7 @@ int main(void)
                                             found++;
                                         }
                                         i2c_stop();
+                                        _delay_ms(2);
                                         if (found >= 2) break;
                                     }
 

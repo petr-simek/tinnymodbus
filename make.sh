@@ -2,6 +2,7 @@
 
 # clean
 rm -rf build/*
+mkdir -p build
 rm -rf *.hex
 rm -rf *.eep
 
