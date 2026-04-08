@@ -52,9 +52,7 @@
 import sys
 import logging
 
-from pymodbus.constants import Endian
-from pymodbus.payload import BinaryPayloadDecoder
-from pymodbus.payload import BinaryPayloadBuilder
+from pymodbus.client.mixin import ModbusClientMixin
 from pymodbus.client import ModbusSerialClient as ModbusClient
 
 
@@ -63,33 +61,34 @@ logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.INFO)
 
-# create connection (boot mode is 9600)
-client = ModbusClient(method='rtu', port='/dev/ttyACM0', baudrate=9600, timeout=1.5)
-client.connect()
-
 idslave = 0x01
+modbus_port = '/dev/ttyACM0'
 
-if len(sys.argv) == 2:
+if len(sys.argv) >= 2:
   try:
     idslave = int(sys.argv[1])
   except:
-    print ("usage: %s [idslave]" % sys.argv[0])
+    print ("usage: %s [idslave] [port]" % sys.argv[0])
     sys.exit(-1)
+if len(sys.argv) >= 3:
+  modbus_port = sys.argv[2]
 
+# create connection (boot mode is 9600)
+client = ModbusClient(port=modbus_port, baudrate=9600, timeout=1.5)
+client.connect()
 # get running mode
 print ("modbus cmd: 0x03 value: 0x0000 length: 0x01\n")
 result  = client.read_holding_registers(address=0x0000, count=0x01, slave=idslave)
-decoder = BinaryPayloadDecoder.fromRegisters(result.registers, byteorder=Endian.Big, wordorder=Endian.Big)
-print (decoder.decode_16bit_int(), " (running mode)\n")
+decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT16, registers=result.registers)
+print (decoder, " (running mode)\n")
 
 print ("")
 
 # get loader version
 print ("modbus cmd: 0x03 value: 0x0001 length: 0x02\n")
 result  = client.read_holding_registers(address=0x0001, count=0x02, slave=idslave)
-decoder = BinaryPayloadDecoder.fromRegisters(result.registers, byteorder=Endian.Big, wordorder=Endian.Big)
-x = decoder.decode_32bit_int();
-print (''.join(chr((x>>8*(4-byte-1))&0xFF) for byte in range(4)) , " (software version)\n")
+decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
+print (''.join(chr((decoder>>8*(4-byte-1))&0xFF) for byte in range(4)) , " (software version)\n")
 
 print ("")
 

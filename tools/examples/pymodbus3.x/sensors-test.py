@@ -38,12 +38,12 @@ if len(sys.argv) == 2:
 for i in range(1,7):
     try:
         print ("0x03 0x0001\n")
-        result  = client.read_holding_registers(address=0x0002, count=0x01, device_id=i)
+        result  = client.read_holding_registers(address=0x0002, count=0x01, slave=i)
         decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT16, registers=result.registers)
         print (decoder, " address\n")
 
         print ("0x03 0x0001\n")
-        result  = client.read_holding_registers(address=0x0001, count=0x02, device_id=i)
+        result  = client.read_holding_registers(address=0x0001, count=0x02, slave=i)
         decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
         print (''.join(chr((decoder>>8*(4-byte-1))&0xFF) for byte in range(4)) , " software version \n")
     except:

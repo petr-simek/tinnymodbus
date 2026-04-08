@@ -80,7 +80,7 @@ avr-gcc -c $CFLAGS -flto -MF build/eeprom.o.d   -Wa,-adhlns=build/eeprom.c.lst  
 avr-gcc -c $CFLAGS -flto -MF build/crc8.o.d     -Wa,-adhlns=build/crc8.lst       libs/crc8.c     -o build/crc8.o
 avr-gcc -c $CFLAGS -flto -MF build/crc16.o.d    -Wa,-adhlns=build/crc16.lst      libs/crc16.c    -o build/crc16.o
 avr-gcc -c $CFLAGS -flto -MF build/1wire.o.d    -Wa,-adhlns=build/1wire.lst      libs/1wire.c    -o build/1wire.o
-avr-gcc -c $CFLAGS -flto -MF build/softi2c.o.d  -Wa,-adhlns=build/softi2c.lst    libs/softi2c.c  -o build/softi2c.o
+avr-gcc -c $CFLAGS       -MF build/softi2c.o.d  -Wa,-adhlns=build/softi2c.lst    libs/softi2c.c  -o build/softi2c.o
 avr-gcc -c $CFLAGS -flto -MF build/usiuartx.o.d -Wa,-adhlns=build/usiuartx.c.lst libs/usiuartx.c -o build/usiuartx.o
 # main.c
 avr-gcc -c $CFLAGS -flto -MF build/main.o.d     -Wa,-adhlns=build/main.lst       main.c          -o build/main.o

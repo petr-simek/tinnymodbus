@@ -73,24 +73,24 @@ except:
   sys.exit(-1)
 
 print ("modbus cmd: 0x06 addr: 0x0001 value: 0x%04x length: 0x01\n" % newaddr)
-result  = client.write_register(address=0x0001, value=newaddr, device_id=slvaddr)
+result  = client.write_register(address=0x0001, value=newaddr, slave=slvaddr)
 print (result)
 
 print ("")
 
 print ("0x03 0x0000\n")
-result  = client.read_holding_registers(address=0x0000, count=0x01, device_id=newaddr)
+result  = client.read_holding_registers(address=0x0000, count=0x01, slave=newaddr)
 decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT16, registers=result.registers)
 print (decoder, " running mode\n")
 print ("")
 
 print ("0x03 0x0001\n")
-result  = client.read_holding_registers(address=0x0002, count=0x01, device_id=newaddr)
+result  = client.read_holding_registers(address=0x0002, count=0x01, slave=newaddr)
 decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT16, registers=result.registers)
 print (decoder, " address\n")
 
 print ("0x03 0x0001\n")
-result  = client.read_holding_registers(address=0x0001, count=0x02, device_id=newaddr)
+result  = client.read_holding_registers(address=0x0001, count=0x02, slave=newaddr)
 decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT32, registers=result.registers)
 print (''.join(chr((decoder>>8*(4-byte-1))&0xFF) for byte in range(4)) , " software version \n")
 

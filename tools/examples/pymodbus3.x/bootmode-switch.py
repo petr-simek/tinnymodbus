@@ -77,7 +77,7 @@ client = ModbusClient(port=modbus_port, baudrate=9600, timeout=1.5)
 client.connect()
 
 print ("modbus cmd: 0x01 value: 0x0000 length: 0x01\n")
-result  = client.write_register(address=0x0000, value=0x0000, device_id=idslave)
+result  = client.write_register(address=0x0000, value=0x0000, slave=idslave)
 print (result)
 
 print ("")

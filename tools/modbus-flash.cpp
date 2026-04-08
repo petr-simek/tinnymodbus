@@ -269,9 +269,10 @@ int main( int argc, char**argv )
     const char *io = "/dev/ttyACM0";
     if (argc >= 4) {
         io = argv[3];
+        printf( "port %s\n", io);
     }
 
-    fd = open( io, O_RDWR | O_NOCTTY | O_SYNC );
+    fd = open( io, O_RDWR | O_NOCTTY | O_SYNC | O_NONBLOCK );
 
     if ( fd < 0 )
     {
@@ -279,11 +280,15 @@ int main( int argc, char**argv )
         return -1;
     }
 
+    // clear O_NONBLOCK so reads block normally with VMIN/VTIME
+    fcntl( fd, F_SETFL, fcntl( fd, F_GETFL ) & ~O_NONBLOCK );
+
+    printf( "opened %s\n", io);
     // 38400 8N1
     set_interface_attribs( fd, B9600 );
     // set to timed read
     set_mincount( fd, 1 );
-
+ printf( "port2 %s\n", io);
     // blank modbus frame
     unsigned char msg[40] =
     {
@@ -300,7 +305,7 @@ int main( int argc, char**argv )
 
     // slv address
     msg[0] = (int)strtol(argv[1], NULL, 16);
-
+ printf( "port3 %s\n", io);
 
     int offset = 0;
     // burn data in 32 octet batches
