@@ -167,9 +167,9 @@ void set_mincount( int fd, int mcount )
 int main( int argc, char**argv )
 {
 
-    if (argc != 3)
+    if (argc < 3 || argc > 4)
     {
-      printf( "Usage: modbus-flash <slave-addr> <intel-hexfile.hex>\n" );
+      printf( "Usage: modbus-flash <slave-addr> <intel-hexfile.hex> [serial-port]\n" );
       exit( 1 );
     }
 
@@ -267,6 +267,9 @@ int main( int argc, char**argv )
     int wlen = 0;
 
     const char *io = "/dev/ttyACM0";
+    if (argc >= 4) {
+        io = argv[3];
+    }
 
     fd = open( io, O_RDWR | O_NOCTTY | O_SYNC );
 

@@ -20,6 +20,7 @@ log = logging.getLogger()
 log.setLevel(logging.INFO)
 
 client = ModbusClient(port='/dev/ttyACM0', baudrate=38400, timeout=1.5)
+# client = ModbusClient(port='/dev/ttyUSB0', baudrate=38400, timeout=1.5)
 # client = ModbusClient( port='/dev/ttyACM0', baudrate=19200, timeout=1.5)
 #client = ModbusClient(method='rtu', port='/dev/ttyUSB0', baudrate=9600, timeout=1.5)
 client.connect()
@@ -124,6 +125,27 @@ try:
 
   print ("")
 
+  print ("0x04 0x1200\n")
+  result  = client.read_input_registers(address=0x1200, count=0x01, device_id=idslave)
+  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.UINT16, registers=result.registers)
+  
+  addr1 = (decoder >> 8) & 0xFF
+  addr2 = decoder & 0xFF
+  
+  if addr1 != 0:
+      print (f" I2C Device 1 found at: {hex(addr1)}")
+  if addr2 != 0:
+      print (f" I2C Device 2 found at: {hex(addr2)}")
+  if addr1 == 0 and addr2 == 0:
+      print (" No I2C devices found.")
+
+except Exception as e:
+  print ("Error calling I2C scan:", e)
+
+try:
+
+  print ("")
+
   print ("0x04 0x1220\n")
   result  = client.read_input_registers(address=0x1220, count=0x02, device_id=idslave)
   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
@@ -135,14 +157,14 @@ except:
 
 try:
 
-  print ("0x04 0x1200\n")
+  print ("0x04 0x1250\n")
   result  = client.read_input_registers(address=0x1250, count=0x02, device_id=idslave)
   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
   print (" %.2f C (sht21)\n" % decoder)
 
   print ("")
 
-  print ("0x04 0x1201\n")
+  print ("0x04 0x1251\n")
   result  = client.read_input_registers(address=0x1251, count=0x02, device_id=idslave)
   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
   print (" %.2f (sht21)\n" % decoder)

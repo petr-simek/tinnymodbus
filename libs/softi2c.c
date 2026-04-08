@@ -291,19 +291,10 @@ uint8_t i2c_start(uint8_t addr)
 #endif
      " sbi      %[SDADDR],%[SDAPIN]     ;force SDA low  \n\t"
      " rcall    ass_i2c_delay_half      ;wait T/2 \n\t"
-     " rcall    ass_i2c_write           ;now write address (addr je v r24) \n\t"
-     // Tvoje verze:
-     // C = 1 -> ACK (OK)
-     // C = 0 -> NACK / chyba
-
-     " brcs     _Li2c_start_ok          ;if C=1 (carry set) -> ACK OK\n\t"
-     " ldi      r24,1                   ;C=0 -> error code 1 (NACK) \n\t"
-     " clr      r25                     ;pro jistotu high byte \n\t"
-     " ret                              ;return 1 (error)\n\t"
-
-     "_Li2c_start_ok:\n\t"
-     " ldi      r24,0                   ;ACK -> OK, return 0\n\t"
-     " clr      r25                     ;high byte = 0\n\t"
+     " rcall    ass_i2c_write           ;now write address (addr in r24) \n\t"
+     // ass_i2c_write returns r24=1 for ACK, r24=0 for NACK
+     // r25 already cleared by ass_i2c_write
+     // just pass through the result directly
      " ret\n\t"
      :
      : [SDADDR] "I" (SDA_DDR), [SDAPIN] "I" (SDA_PIN),

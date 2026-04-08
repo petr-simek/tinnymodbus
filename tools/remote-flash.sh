@@ -1,19 +1,20 @@
 #!/bin/sh
 
-ADDR=1
+ADDR=${1:-4}
+PORT=${2:-/dev/ttyUSB0}
 
 # switch into bootloader
-python ./examples/pymodbus3.x/mainmode-switch.py $ADDR
+python ./examples/pymodbus3.x/mainmode-switch.py $ADDR $PORT
 
 sleep .5
 echo "sending"
 # flash over rs485 wires
-./modbus-flash $ADDR ../main.hex
+./modbus-flash $ADDR ../main.hex $PORT
 
 echo "send"
 
 sleep .5
 
 # switch back to main
-python ./examples/pymodbus3.x/bootmode-switch.py $ADDR
+python ./examples/pymodbus3.x/bootmode-switch.py $ADDR $PORT
 

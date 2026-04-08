@@ -27,6 +27,7 @@
   |                 |                   |   **0x02 Illegal data address (device XX does not exist)** |
   |                 |                   |   **0x08 Parity Error         (device XX CRC failed)**     |
   |                 |                   |   **0x11 Failed to Respond    (device XX BUS failed)**     |
+  | 0x1200 (1 regs) | 2 byte (uint16_t) | I2C: Scan and return addresses of up to 2 connected devices|
   | 0x1220 (2 regs) | 4 byte (float)    | I2C: Read illuminance from BH1750 device (Lux)             |
   | 0x1230 (2 regs) | 4 byte (int32_t)  | I2C: Read temperature from BMP280 device (Celsius)         |
   | 0x1231 (2 regs) | 4 byte (int32_t)  | I2C: Read air pressure from BMP280 device (hPa)            |

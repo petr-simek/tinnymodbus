@@ -94,7 +94,7 @@ uint8_t bme280_done = 0x00;
 uint8_t scd41_done = 0x00;
 
 // software version string
-static const char PROGMEM SWVers[4] = "0.29"; // 4 octet ASCII
+static const char PROGMEM SWVers[4] = "0.44"; // 4 octet ASCII
 
 /*
  *  embed and send modbus frame
@@ -207,6 +207,7 @@ int main(void)
 
                         // response buffer
                         uint8_t sendbuff[16];
+                        sendbuff[2] = 0; // initialize to 0 so unsupported messages fall through neatly
 
                         // fill header
                         sendbuff[0] = IdSv; // slv addr
@@ -398,6 +399,36 @@ int main(void)
                                     }
                                 }
                                 #endif
+
+                                // return I2C SCANNER
+                                if ( daddr == 0x1200 )
+                                {
+                                    // requested amount
+                                    if ( modbus[5] != 0x01 ) break;
+
+                                    sendbuff[2] = 0x02; // mslen
+                                    uint8_t addr1 = 0;
+                                    uint8_t addr2 = 0;
+                                    uint8_t found = 0;
+
+                                    i2c_init();
+
+                                    for (uint8_t a = 1; a < 128; a++) {
+                                        if (i2c_start(a << 1) != 0) {
+                                            if (found == 0) addr1 = a;
+                                            else if (found == 1) addr2 = a;
+                                            found++;
+                                        }
+                                        i2c_stop();
+                                        if (found >= 2) break;
+                                    }
+
+                                    sendbuff[3] = addr1;
+                                    sendbuff[4] = addr2;
+
+                                    send_modbus_array( &sendbuff[0], 7 );
+                                }
+
                                  #ifdef _SHT31_H
                                 // return I2C DEV VALUES
                                 if ( ( daddr >= 0x1250 ) &&

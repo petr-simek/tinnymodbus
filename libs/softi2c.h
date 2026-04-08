@@ -56,8 +56,10 @@
 
 
 #define I2C_FASTMODE 0
-#define I2C_SLOWMODE 0
-#define I2C_PULLUP 0
+#define I2C_SLOWMODE 1
+#ifndef I2C_PULLUP
+#define I2C_PULLUP 1
+#endif
 #define I2C_NOINTERRUPT 1
 #define I2C_TIMEOUT 100
 
