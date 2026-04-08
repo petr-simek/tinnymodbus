@@ -94,7 +94,7 @@ uint8_t bme280_done = 0x00;
 uint8_t scd41_done = 0x00;
 
 // software version string
-static const char PROGMEM SWVers[4] = "0.56"; // 4 octet ASCII
+static const char PROGMEM SWVers[4] = "0.58"; // 4 octet ASCII
 
 /*
  *  embed and send modbus frame

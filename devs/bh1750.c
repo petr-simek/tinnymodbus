@@ -76,16 +76,14 @@ float bh1750_read_value(void)
 {
     cli();
 
-    uint8_t err = i2c_init();
-    if (err != 0) {
+    if (!i2c_init()) {
         sei();
-        return -1.0 * err;  // nebo nějaký tvůj error kód
+        return -1.0;
     }
-     err = i2c_start( (BH1750_I2CADDR<<1) | 0x1 );
-    if (err) {
+    if (!i2c_start( (BH1750_I2CADDR<<1) | 0x1 )) {
         i2c_stop();
         sei();
-        return -1 * (err + 0.5);                  // senzor nereaguje (NACK)
+        return -2.0;
     }
 
     uint8_t msb = i2c_read(0);

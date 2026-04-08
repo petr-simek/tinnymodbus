@@ -142,36 +142,36 @@ try:
 except Exception as e:
   print ("Error calling I2C scan:", e)
 
-# try:
+try:
+
+  print ("")
+
+  print ("0x04 0x1220\n")
+  result  = client.read_input_registers(address=0x1220, count=0x02, slave=idslave)
+  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+  print (" " ,decoder, " VI lux (bh1750)" )
+
+except:
+
+  print ("No BH1750 found.")
 #
-#   print ("")
-#
-#   print ("0x04 0x1220\n")
-#   result  = client.read_input_registers(address=0x1220, count=0x02, slave=idslave)
-#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
-#   print (" " ,decoder, " VI lux (bh1750)" )
-#
-# except:
-#
-#   print ("No BH1750 found.")
-#
-# try:
-#
-#   print ("0x04 0x1250\n")
-#   result  = client.read_input_registers(address=0x1250, count=0x02, slave=idslave)
-#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
-#   print (" %.2f C (sht21)\n" % decoder)
-#
-#   print ("")
-#
-#   print ("0x04 0x1251\n")
-#   result  = client.read_input_registers(address=0x1251, count=0x02, slave=idslave)
-#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
-#   print (" %.2f (sht21)\n" % decoder)
-#
-# except:
-#
-#   print ("No SHT21 found.")
+try:
+
+  print ("0x04 0x1250\n")
+  result  = client.read_input_registers(address=0x1250, count=0x02, slave=idslave)
+  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+  print (" %.2f C (sht21)\n" % decoder)
+
+  print ("")
+
+  print ("0x04 0x1251\n")
+  result  = client.read_input_registers(address=0x1251, count=0x02, slave=idslave)
+  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+  print (" %.2f (sht21)\n" % decoder)
+
+except:
+
+  print ("No SHT21 found.")
 
 # try:
 #
