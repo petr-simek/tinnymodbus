@@ -167,9 +167,19 @@ void set_mincount( int fd, int mcount )
 int main( int argc, char**argv )
 {
 
+    int debug = 0;
+    for (int a = 1; a < argc; a++) {
+      if (strcmp(argv[a], "--debug") == 0) {
+        debug = 1;
+        for (int b = a; b < argc - 1; b++) argv[b] = argv[b+1];
+        argc--;
+        a--;
+      }
+    }
+
     if (argc < 3 || argc > 4)
     {
-      printf( "Usage: modbus-flash <slave-addr> <intel-hexfile.hex> [serial-port]\n" );
+      printf( "Usage: modbus-flash [--debug] <slave-addr> <intel-hexfile.hex> [serial-port]\n" );
       exit( 1 );
     }
 
@@ -283,12 +293,10 @@ int main( int argc, char**argv )
     // clear O_NONBLOCK so reads block normally with VMIN/VTIME
     fcntl( fd, F_SETFL, fcntl( fd, F_GETFL ) & ~O_NONBLOCK );
 
-    printf( "opened %s\n", io);
     // 38400 8N1
     set_interface_attribs( fd, B9600 );
     // set to timed read
     set_mincount( fd, 1 );
- printf( "port2 %s\n", io);
     // blank modbus frame
     unsigned char msg[40] =
     {
@@ -305,13 +313,11 @@ int main( int argc, char**argv )
 
     // slv address
     msg[0] = (int)strtol(argv[1], NULL, 16);
- printf( "port3 %s\n", io);
 
     int offset = 0;
     // burn data in 32 octet batches
     for ( long unsigned int i = 0; i < dataflash.size(); i++ )
     {
-       printf("Send %ld from %ld\n", i, dataflash.size());
       // place octet on wire message
       msg[offset + 6] = dataflash[i];
 
@@ -335,37 +341,45 @@ int main( int argc, char**argv )
            exit(-1);
         }
 
-        printf("TX:");
-        for ( int i = 0; i < 38; i++ )
+        if ( debug )
         {
-          printf( " %02x", msg[i] );
+          printf("TX:");
+          for ( int i = 0; i < 38; i++ )
+            printf( " %02x", msg[i] );
+          printf("\n CRC [0x");
+          for ( int i = 38; i < 40; i++ )
+            printf( "%02x", msg[i] );
+          printf("]\n");
         }
-
-        printf("\n CRC [0x");
-        for ( int i = 38; i < 40; i++ )
-        {
-          printf( "%02x", msg[i] );
-        }
-        printf("]\n");
 
         // small buffer
         unsigned char buf[40];
 
         // read header
-        printf("\nRX:");
         for ( int i = 0; i < 6; i++ )
-        {
           read( fd, &buf[i], 0x1 );
-          printf( " %02x", buf[i] );
-        }
         // read crc
         for ( int i = 0; i < 2; i++ )
           read( fd, &buf[i], 0x1 );
 
         unsigned char locrc = buf[0];
         unsigned char hicrc = buf[1];
-        printf( "\n CRC [0x%02x%02x]\n\n", locrc, hicrc );
-        fflush( stdout );
+
+        if ( debug )
+        {
+          printf("\nRX:");
+          for ( int j = 0; j < 6; j++ )
+            printf( " %02x", buf[j] );
+          printf( "\n CRC [0x%02x%02x]\n\n", locrc, hicrc );
+        }
+
+        int pct = (int)(100.0 * (i+1) / dataflash.size());
+        int prev_pct = (i >= 32) ? (int)(100.0 * (i+1-32) / dataflash.size()) : -1;
+        if ( pct != prev_pct )
+        {
+          printf("\rFlashing: %3d%%", pct);
+          fflush( stdout );
+        }
 
         // reset message buffer
         for ( int k = 0; k < 32; k++ )
@@ -382,5 +396,6 @@ int main( int argc, char**argv )
       offset++;
     }
 
+    printf("\n");
     return 0;
 }

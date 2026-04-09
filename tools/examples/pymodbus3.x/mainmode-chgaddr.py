@@ -60,10 +60,8 @@ from pymodbus.client import ModbusSerialClient as ModbusClient
 logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.INFO)
-
+modbus_port = '/dev/ttyUSB0'
 # create connection (main mode is 38400)
-client = ModbusClient(port='/dev/ttyACM0', baudrate=38400, timeout=1.5)
-client.connect()
 
 try:
   slvaddr = int(sys.argv[1])
@@ -72,6 +70,11 @@ except:
   print ("usage: %s [slvaddr] [newaddr]" % sys.argv[0])
   sys.exit(-1)
 
+if len(sys.argv) >= 4:
+  modbus_port = sys.argv[3]
+
+client = ModbusClient(port=modbus_port, baudrate=38400, timeout=1.5)
+client.connect()
 print ("modbus cmd: 0x06 addr: 0x0001 value: 0x%04x length: 0x01\n" % newaddr)
 result  = client.write_register(address=0x0001, value=newaddr, slave=slvaddr)
 print (result)

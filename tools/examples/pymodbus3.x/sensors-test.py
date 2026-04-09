@@ -20,20 +20,17 @@ log = logging.getLogger()
 log.setLevel(logging.INFO)
 
 # client = ModbusClient(port='/dev/ttyACM0', baudrate=38400, timeout= 0.2)
-client = ModbusClient(port='/dev/ttyUSB0', baudrate=38400, timeout= 0.2)
+# client = ModbusClient(port='/dev/ttyUSB0', baudrate=38400, timeout= 0.2)
 # client = ModbusClient( port='/dev/ttyACM0', baudrate=19200, timeout=1.5)
 # client = ModbusClient(method='rtu', port='/dev/ttyUSB0', baudrate=9600, timeout=1.5)
+# client.connect()
+
+modbus_port = '/dev/ttyACM0'
+if len(sys.argv) >= 2:
+  modbus_port = sys.argv[1]
+
+client = ModbusClient(port=modbus_port, baudrate=38400, timeout=0.2)
 client.connect()
-
-idslave = 1
-
-if len(sys.argv) == 2:
-  try:
-    idslave = int(sys.argv[1])
-  except:
-    print ("usage: %s [idslave]" % sys.argv[0])
-    sys.exit(-1)
-
 
 for i in range(1,7):
     try:

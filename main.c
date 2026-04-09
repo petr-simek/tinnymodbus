@@ -94,7 +94,7 @@ uint8_t bme280_done = 0x00;
 uint8_t scd41_done = 0x00;
 
 // software version string
-static const char PROGMEM SWVers[4] = "0.58"; // 4 octet ASCII
+static const char PROGMEM SWVers[4] = "0.63"; // 4 octet ASCII
 
 /*
  *  embed and send modbus frame
@@ -148,6 +148,18 @@ int main(void)
     usiuartx_init();
 
     sei();
+
+    #ifdef SCD41
+    {
+        uint16_t pressure = (eeprom_read_byte(&EEData[3]) << 8) | eeprom_read_byte(&EEData[4]);
+        if ( pressure >= 700 && pressure <= 1400 )
+        {
+            scd41SetAmbientPressure( pressure );
+        }
+        scd41StartMeasurement();
+        scd41_done = 0x01;
+    }
+    #endif
 
     /*
      * receive buffer for modbus frame (fcode = 3,4,6)

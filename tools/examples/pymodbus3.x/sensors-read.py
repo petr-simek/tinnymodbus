@@ -19,21 +19,24 @@ logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.INFO)
 
-client = ModbusClient(port='/dev/tty.usbmodem5A350086991', baudrate=38400, timeout=1.5)
-# client = ModbusClient(port='/dev/ttyUSB0', baudrate=38400, timeout=1.5)
-# client = ModbusClient( port='/dev/ttyACM0', baudrate=19200, timeout=1.5)
-#client = ModbusClient(method='rtu', port='/dev/ttyUSB0', baudrate=9600, timeout=1.5)
-client.connect()
-
 idslave = 4
+modbus_port = '/dev/ttyACM0'
 
-if len(sys.argv) == 2:
+if len(sys.argv) >= 2:
   try:
     idslave = int(sys.argv[1])
   except:
     print ("usage: %s [idslave]" % sys.argv[0])
     sys.exit(-1)
+if len(sys.argv) >= 3:
+  modbus_port = sys.argv[2]
 
+client = ModbusClient(port=modbus_port, baudrate=38400, timeout=1.5)
+# client = ModbusClient(port='/dev/ttyUSB0', baudrate=38400, timeout=1.5)
+# client = ModbusClient( port='/dev/ttyACM0', baudrate=19200, timeout=1.5)
+# client = ModbusClient(method='rtu', port='/dev/ttyUSB0', baudrate=9600, timeout=1.5)
+client.connect()
+print("port %s address %d" % (modbus_port, idslave))
 print ("0x03 0x0000\n")
 result  = client.read_holding_registers(address=0x0000, count=0x01, slave=idslave)
 decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.INT16, registers=result.registers)
@@ -154,24 +157,24 @@ try:
 except:
 
   print ("No BH1750 found.")
+# #
+# try:
 #
-try:
-
-  print ("0x04 0x1250\n")
-  result  = client.read_input_registers(address=0x1250, count=0x02, slave=idslave)
-  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
-  print (" %.2f C (sht21)\n" % decoder)
-
-  print ("")
-
-  print ("0x04 0x1251\n")
-  result  = client.read_input_registers(address=0x1251, count=0x02, slave=idslave)
-  decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
-  print (" %.2f (sht21)\n" % decoder)
-
-except:
-
-  print ("No SHT21 found.")
+#   print ("0x04 0x1250\n")
+#   result  = client.read_input_registers(address=0x1250, count=0x02, slave=idslave)
+#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+#   print (" %.2f C (sht21)\n" % decoder)
+#
+#   print ("")
+#
+#   print ("0x04 0x1251\n")
+#   result  = client.read_input_registers(address=0x1251, count=0x02, slave=idslave)
+#   decoder = client.convert_from_registers(data_type=ModbusClientMixin.DATATYPE.FLOAT32, registers=result.registers)
+#   print (" %.2f (sht21)\n" % decoder)
+#
+# except:
+#
+#   print ("No SHT21 found.")
 
 # try:
 #

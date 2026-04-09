@@ -97,11 +97,11 @@ int32_t scd41ReadValue(uint8_t TYPE)
         
         i2c_rep_start((SCD41_ADDR<<1)|0x1);
 
-        int8_t idx = 0;
-        for(idx = 0; idx<8; idx++) {
+        uint8_t idx;
+        for(idx = 0; idx < 8; idx++) {
             buffer[idx] = i2c_read(0);
         }
-        buffer[++idx] = i2c_read(1);
+        buffer[idx] = i2c_read(1);
 
         i2c_stop();
 
