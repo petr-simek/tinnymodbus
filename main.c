@@ -85,7 +85,9 @@
 #include "scd41.h"
 #endif
 
-
+#include "atsens.h"
+extern float sensVcc;
+extern float sensTmp;
 extern uint8_t EEData[];
 
 uint8_t bh1750_done = 0x00;
@@ -94,7 +96,7 @@ uint8_t bme280_done = 0x00;
 uint8_t scd41_done = 0x00;
 
 // software version string
-static const char PROGMEM SWVers[4] = "0.63"; // 4 octet ASCII
+static const char PROGMEM SWVers[4] = "0.66"; // 4 octet ASCII
 
 /*
  *  embed and send modbus frame
@@ -279,6 +281,45 @@ int main(void)
                                     sendbuff[4] = IdSv;
 
                                     send_modbus_array( &sendbuff[0], 7 );
+                                }
+
+                                if ( daddr == 0x0003 )
+                                {
+                                    // requested amount
+                                    if ( modbus[5] != 0x02 ) break;
+
+                                    sendbuff[2] = 0x04; // mslen
+
+                                    // reads
+                                    getSens( 4 );
+
+                                    // store Vcc
+                                    sendbuff[3] = ((uint8_t*)(&sensVcc))[3];
+                                    sendbuff[4] = ((uint8_t*)(&sensVcc))[2];
+                                    sendbuff[5] = ((uint8_t*)(&sensVcc))[1];
+                                    sendbuff[6] = ((uint8_t*)(&sensVcc))[0];
+
+                                    send_modbus_array( &sendbuff[0], 9 );
+                                }
+
+                                // return internal TMP
+                                if ( daddr == 0x0004 )
+                                {
+                                    // requested amount
+                                    if ( modbus[5] != 0x02 ) break;
+
+                                    sendbuff[2] = 0x04; // mslen
+
+                                    // reads
+                                    getSens( 4 );
+
+                                    // store Temp
+                                    sendbuff[3] = ((uint8_t*)(&sensTmp))[3];
+                                    sendbuff[4] = ((uint8_t*)(&sensTmp))[2];
+                                    sendbuff[5] = ((uint8_t*)(&sensTmp))[1];
+                                    sendbuff[6] = ((uint8_t*)(&sensTmp))[0];
+
+                                    send_modbus_array( &sendbuff[0], 9 );
                                 }
                                 break; // fcode=0x03
 

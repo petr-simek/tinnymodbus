@@ -82,11 +82,12 @@ avr-gcc -c $CFLAGS -flto -MF build/crc16.o.d    -Wa,-adhlns=build/crc16.lst     
 avr-gcc -c $CFLAGS -flto -MF build/1wire.o.d    -Wa,-adhlns=build/1wire.lst      libs/1wire.c    -o build/1wire.o
 avr-gcc -c $CFLAGS       -MF build/softi2c.o.d  -Wa,-adhlns=build/softi2c.lst    libs/softi2c.c  -o build/softi2c.o
 avr-gcc -c $CFLAGS -flto -MF build/usiuartx.o.d -Wa,-adhlns=build/usiuartx.c.lst libs/usiuartx.c -o build/usiuartx.o
+avr-gcc -c $CFLAGS -flto -MF build/atsens.o.d -Wa,-adhlns=build/atsens.c.lst libs/atsens.c -o build/atsens.o
 # main.c
 avr-gcc -c $CFLAGS -flto -MF build/main.o.d     -Wa,-adhlns=build/main.lst       main.c          -o build/main.o
 
 avr-gcc $CFLAGS -flto -o build/main.elf \
-                build/main.o build/usiuartx.o build/crc16.o build/crc8.o  build/sht31.o build/scd41.o  \
+                build/main.o build/usiuartx.o build/crc16.o build/crc8.o build/atsens.o build/sht31.o build/scd41.o  \
                 build/bh1750.o build/bmp280.o build/bme280.o build/1wire.o build/softi2c.o build/ds18b20.o \
                 build/eeprom.o -Wl,--relax,--gc-sections,-Map=build/main.map
 
